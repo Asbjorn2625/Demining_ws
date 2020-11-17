@@ -41,11 +41,16 @@ target_link_libraries(MineSweeper
 
 #############
 ## Install ##
-#############
+############w#
 
 # Mark executables for installation
 install(TARGETS hello_world
 
+
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS MineSweeper
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
