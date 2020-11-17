@@ -25,8 +25,13 @@ include_directories(
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
 add_executable(hello_world src/hello_world.cpp)
+add_executable(MineSweeper src/MineSweeper.cpp)
 # Link to Catkin libraries
 target_link_libraries(hello_world
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(MineSweeper
   ${catkin_LIBRARIES}
 )
 
