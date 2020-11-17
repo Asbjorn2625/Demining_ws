@@ -47,11 +47,16 @@ target_link_libraries(locate_d_area
 
 #############
 ## Install ##
-#############
+############w#
 
 # Mark executables for installation
 install(TARGETS hello_world locate_d_area
 
+
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS MineSweeper
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
