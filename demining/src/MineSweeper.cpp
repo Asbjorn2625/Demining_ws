@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <turtlesim/TeleportAbsolute.h>
+#include <turtlesim/Color.h>
 #include <turtlesim/SetPen.h>
 #include <iostream>
 #include "stdlib.h"
@@ -18,10 +19,19 @@ float StartX = 0.0;     //Start position
 float StartY = 0.0;     //Start position
 float currentPosX = 0.0;//Current position
 float currentPosY = 0.0;//Current position
+//Color sensors
+bool first_color_saved = false;
+turtlesim::Color first_color;
 
 
 int FoundMines = 0;     //Number of found mines
 
+
+
+//CONNECTION --> 
+//Publisher
+ros::Publisher cmd_vel_pub;
+//Subscriber
 
 
 //roslaunch turtlebot_bringup minimal.launch
@@ -149,11 +159,27 @@ return numb;
 };     
 
 
+void GoTo(float newX, float newY){ //Go to given location
+
+
+if(newX != currentPosX || newY != currentPosY){
+
+}
+
+
+}
 
 
 
 
+void Sensor1(
+ if(!first_color_saved)
+  {
+    first_color = sensed_color;
+    first_color_saved = true;
+  }
 
+}
 
 
 
