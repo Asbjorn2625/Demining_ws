@@ -1,3 +1,4 @@
+
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <turtlesim/TeleportAbsolute.h>
@@ -6,13 +7,16 @@
 #include <iostream>
 #include "stdlib.h"
 #include "time.h"
+#include <conio.h> //used with getch() for input
 
 
 ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to see "jerk" movement
 
 //Variable used :
 const double PI = 3.14159265358979323846;
+char Text = "";        //Used to recive input
 int Current_Work = 101; //Variable used to check current work/
+int Last_Work = 0; //Variable used to check last work
 float AreaLenght = 0;   //Given area lenght
 float AreaWidth = 0;    //given area width
 float StartX = 0.0;     //Start position
@@ -50,6 +54,24 @@ geometry_msgs::Twist cmd_vel_message;
 cmd_vel_message.angular.z=1.0;
 cmd_vel_message.linear.x=1.0;
 
+ ----------------------------// NEW INPUT
+std::string line;
+if( !std::getline(std::cin, line) ){
+    cout << "You entered " + line << endl;
+    if(input(line) != Last_Work){
+        Last_Work = Current_Work;
+        Current_Work = input(line);
+
+
+    }
+    
+}
+
+
+
+
+
+
 switch (Current_Work){       //Switch to change program funktion
                             //(Scan_area / Sweep the area Etc.)
 case 101: //Scan Area
@@ -72,6 +94,8 @@ case 909: //RetrivOtherBot
 
 case 808: //Return
 
+
+
     break;
 
 case 001: //LOW BATTERY
@@ -80,6 +104,14 @@ case 001: //LOW BATTERY
 
 case 505: //Manual Takeover
 
+break;
+
+case 002: //STOP
+
+    break;
+
+case 707: //Shut down
+return 0;
 break;
 
 default:
@@ -164,15 +196,16 @@ void GoTo(float newX, float newY){ //Go to given location
 
 if(newX != currentPosX || newY != currentPosY){
 
-}
-
 
 }
 
 
+}
 
 
-void Sensor1(
+
+
+void Sensor1()
  if(!first_color_saved)
   {
     first_color = sensed_color;
@@ -182,6 +215,54 @@ void Sensor1(
 }
 
 
+
+void input(char text){
+if (text= "MineSweep"){
+    return 404;
+}
+else if(text= "Retrive"){
+    return 909;
+}
+else if(text= "Return"){
+    return 808;
+}
+else if(text= "Low Battery"){
+    return 001;
+}
+else if(text= "Manual"){
+    return 505;
+}
+else if(text= "Scan Area"){
+    return 101;
+}
+else if(text= "STOP"){
+    return 002;
+}
+else if(text= "Shut down"){
+    return 707;
+}
+else
+{
+    std::cout << "Wrong input." << std::endl;
+    std::cout << "Try one of following commands :" << std::endl;
+    std::cout << "Scan Area" << std::endl;
+    std::cout << "MineSweep" << std::endl;
+    std::cout << "Retrive" << std::endl;
+    std::cout << "Return" << std::endl;
+    std::cout << "Low Battery" << std::endl;
+    std::cout << "Manual" << std::endl;
+    std::cout << "STOP" << std::endl;
+    std::cout << "Shut down" << std::endl;
+}
+
+
+}
+
+if(Current_Work != Last_Work){
+    
+
+
+}
 
 /*
 //Links for help:
