@@ -4,6 +4,11 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+
+cv::Mat HSVImage;
+cv::Mat ThreshImage;
 
 static const std::string OPENCV_WINDOW = "Image window";
 
@@ -19,7 +24,7 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/camera/image_raw", 1,
+    image_sub_ = it_.su/ */bscribe("/camera/rgb/image_raw", 1,
       &ImageConverter::imageCb, this);
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
@@ -43,17 +48,17 @@ public:
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
+    //goes from RGB to HSV filter
+    cv::cvtColor(cv_ptr->image,HSVImage,CV_BGR2HSV);
+    //For red i think
+     cv::inRange(HSVImage, cv::Scalar(354, 100, 32), cv::Scalar(354, 100, 100), ThreshImage);
 
-    // Draw an example circle on the video stream
-    if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
-      cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
 
     // Update GUI Window
     cv::imshow(OPENCV_WINDOW, cv_ptr->image);
     cv::waitKey(3);
 
-    // Output modified video stream
-    image_pub_.publish(cv_ptr->toImageMsg());
+
   }
 };
 

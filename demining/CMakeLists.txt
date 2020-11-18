@@ -27,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 
   find_package(OpenCV REQUIRED)
 
+  catkin_package()
 ###########
 ## Build ##
 ###########
@@ -57,7 +58,7 @@ target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 install(TARGETS hello_world
 
 
-  RUNTIME DESTINATION bin ${CATKIN_PACKAGE_BIN_DESTINATION} 
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
 )
 
 #install(TARGETS MineSweeper
