@@ -1,25 +1,40 @@
 #include <ros/ros.h>
-
 #include <iostream> //iostream present for testing purposes
 
-#include <kobuki_msgs/PowerSystemEvent.h>   //Kobuki_node capable of detecting changes to the Power system
+#include <kobuki_msgs/PowerSystemEvent.h>   //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>       //Currenty unused
 
 // Current laptop battery charge topic /laptop_charge (/percentage)
 // Current kobuki battery charge topic /mobile_base/sensors/core/battery
 
-//Initialising global variables
+//Initialisation of global variables
 int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V) 
 int const laptop_max_charge = 200;        //Needs to be found
 bool fullyCharged = false;
 
-//sensor_msgs::BatteryState kobBatLevel;
-sensor_msgs::BatteryState laptopBatLevel;
+//Declaration of callback constants messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
+sensor_msgs::BatteryState kobBatLevel;
+sensor_msgs::BatteryState laptopBatLevel;
+
+//Declaration of subscribers
 ros::Subscriber kobukiBatStateSub;
+ros::Subscriber kobukiBatlevelSub;
 ros::Subscriber laptopBatlevelSub;
 
-//void callbackKobukiBat(const sensor_msgs::BatteryState kobBatLevel)
+//Function for sending the robot back to the start
+void headHomeToCharge()
+{
+  //Save current location (and path?)
+
+  //Drive towards starting position (following a safe route)
+
+  //If manual control is taken pause this task and resume afterwards
+
+  //Activate auto-docking procedure
+  //kobuki_msgs/AutoDocking.action http://docs.ros.org/en/api/kobuki_msgs/html/action/AutoDocking.html
+}
+
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
 {
   switch(kobBatState.event)
@@ -48,9 +63,7 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
   case 4: //Base is low on battery (15%)
     std::cout << "Base is low on battery. Pausing operation and heading to dock" << std::endl;
     
-    //Drive towards starting position
-    //Activate auto-docking procedure
-    //kobuki_msgs/AutoDocking.action http://docs.ros.org/en/api/kobuki_msgs/html/action/AutoDocking.html
+    headHomeToCharge(); //Send robot home to recharge base
     break;
 
   case 5: //Base battery level is critical! (5%)
@@ -58,35 +71,50 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
     break;
 
   default://Error! this should be unreachable
-    
+    std::cout << "Something when wrong with /mobile_base/events/power_system, it sent wrong data" << std::endl;
     break;
   }
 }
 
 void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 {
-  std::cout << "laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
+  std::cout << "Laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
 
+  if (laptopBatLevel.percentage <= 15)//When laptop reaches 15% remaining power it the robot shall return home
+  //Testet og virker
+  {
+    std::cout << "Laptop is low on battery. Pausing operation and heading to dock" << std::endl;
+
+    headHomeToCharge(); //Send robot home to recharge laptop
+  }
+}
+
+/* attempt at better solution for kobuki base battery
+void callbackKobukiBat(const sensor_msgs::BatteryState kobBatLevel)
+{
+  std::cout << "kobuki battery is currently at " << kobBatLevel.percentage << "%" << std::endl;
+  
   //std::cout << "laptop battery is currently at " << laptopBatLevel << "%" << std::endl;
 }
+*/
 
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "batteryMonitor"); //initialises node as batteryMonitor
   ros::NodeHandle n;
-  laptopBatlevelSub = n.subscribe("/laptop_charge", 10, callbackLaptopBat);
+
+  //Subscribes to the laptop battery
+  laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
   
-  
-  //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core/battery", 10, callbackKobukiBat);
+  //More precise battery function with percentage option
+  //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core", 10, callbackKobukiBat);
 
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
   while(ros::ok())
   {
-    //sensor_msgs::BatteryState test; 
-
-    ros::spinOnce();
+    ros::spinOnce();//Updates all subscribed and published information
   }
   
   return 0;
