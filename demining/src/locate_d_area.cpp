@@ -52,7 +52,7 @@ double posFunc(double pos[3]){
             //ROS_INFO("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startX, startY, startAngle);
 }
 
-void moveForward(int lengthMeters){
+void moveForward(float lengthMeters){
   for(int i=0;i<lengthMeters*50;i++){
       twist.linear.x = 0.2;
       twist.angular.z = 0.0;
@@ -60,7 +60,7 @@ void moveForward(int lengthMeters){
       ros::Duration(0.1).sleep();
     }
 }
-void moveBackward(int lengthMeters){
+void moveBackward(float lengthMeters){
   for(int i=0;i<lengthMeters*50;i++){
       twist.linear.x = -0.2;
       twist.angular.z = 0.0;
@@ -68,14 +68,16 @@ void moveBackward(int lengthMeters){
       ros::Duration(0.1).sleep();
     }
 }
-void turn180deg(double currentAngle, double desiredAngle, int errorFactor){
+void turnAngle(double currentAngle, double desiredAngle, int errorFactor, int rightLeft){
  while(currentAngle <= desiredAngle-errorFactor || currentAngle >=desiredAngle+errorFactor){
       ros::spinOnce();
       twist.linear.x = 0.0;
-      twist.angular.z = 1.0;
+      twist.angular.z = rightLeft*1.0;
       vel_pub.publish(twist);
       currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
     }
+    twist.angular.z = 0.0;
+    vel_pub.publish(twist);
 }
 
 int main(int argc, char *argv[])
@@ -109,17 +111,18 @@ while(ros::ok())
     //turning 180 degress
     if(startPos[2] > 0){
       std::cout << "Angle goal: " << startPos[2]-180 << "\n";
-      turn180deg(startPos[2],startPos[2]-180,1);
+      turnAngle(startPos[2],startPos[2]-180,1,1);
     }else{
       std::cout << "Angle goal: " << startPos[2]+180 << "\n";
-      turn180deg(startPos[2],startPos[2]+180,1);
+      turnAngle(startPos[2],startPos[2]+180,1,-1);
     }
+    ros::spinOnce();
   std::cout << "angle reached: " << radian2degree(tf::getYaw(odomPose.pose.pose.orientation)) << "\n";
 
 //input for the mine zone
 bool errors = true;
 int corners = 2;
-int mineZone[corners];
+float mineZone[corners];
 while(errors == true){
   while(true){
   std::cout << "please input the size of the mine zone, in meters \nwidth: ";
@@ -133,6 +136,22 @@ while(errors == true){
     errors = false;
     break;
   }
+}
+for(int i; i <= mineZone[0]*2; i++){
+moveForward(mineZone[1]);
+ros::spinOnce();
+double angleReached = radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
+if(angleReached > 0){
+  turnAngle(angleReached,angleReached-90,1,-1);
+  moveForward(0.5);
+  turnAngle(angleReached,angleReached-180,1,-1);
+}else{
+  turnAngle(angleReached,angleReached+90,1,+1);
+  moveForward(0.5);
+  turnAngle(angleReached,angleReached+180,1,+1);
+}
+printf("lap %d completed\n", i+1);
+ros::Duration(1).sleep();
 }
 
     return 0;
