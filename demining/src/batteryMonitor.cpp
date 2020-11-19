@@ -3,7 +3,7 @@
 #include <iostream> //iostream present for testing purposes
 
 #include <kobuki_msgs/PowerSystemEvent.h>   //Kobuki_node capable of detecting changes to the Power system
-#include <sensor_msgs/BatteryState.h> //Currenty unused
+#include <sensor_msgs/BatteryState.h>       //Currenty unused
 
 // Current laptop battery charge topic /laptop_charge (/percentage)
 // Current kobuki battery charge topic /mobile_base/sensors/core/battery
@@ -14,10 +14,10 @@ int const laptop_max_charge = 200;        //Needs to be found
 bool fullyCharged = false;
 
 //sensor_msgs::BatteryState kobBatLevel;
-//sensor_msgs::BatteryState laptopBatLevel;
+sensor_msgs::BatteryState laptopBatLevel;
 kobuki_msgs::PowerSystemEvent kobBatState;
 ros::Subscriber kobukiBatStateSub;
-//ros::Subscriber laptopBatlevelSub;
+ros::Subscriber laptopBatlevelSub;
 
 //void callbackKobukiBat(const sensor_msgs::BatteryState kobBatLevel)
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
@@ -63,24 +63,20 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
   }
 }
 
-/*
 void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 {
-  std::cout << "laptop sub callback" << std::endl;
+  std::cout << "laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
 
   //std::cout << "laptop battery is currently at " << laptopBatLevel << "%" << std::endl;
-  //if (laptopBatLevel / laptop_max_charge <= 0.15 && laptop is not charging)
-  {
-    //
-  }
 }
-*/
 
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "batteryMonitor"); //initialises node as batteryMonitor
   ros::NodeHandle n;
-  //laptopBatlevelSub = n.subscribe("/laptop_charge/percentage", 10, callbackLaptopBat);
+  laptopBatlevelSub = n.subscribe("/laptop_charge", 10, callbackLaptopBat);
+  
+  
   //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core/battery", 10, callbackKobukiBat);
 
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
