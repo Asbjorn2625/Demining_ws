@@ -7,13 +7,13 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 
-
-kobuki_msgs::BumperEvent bumpMsg;
-kobuki_msgs::Sound soundMsg;
 ros::Publisher sound_pub;
-ros::Subscriber bumperSub;
+ros::Publisher vel_pub;
 ros::Subscriber poseSub;
+
 nav_msgs::Odometry odomPose;
+geometry_msgs::Twist twist;
+kobuki_msgs::Sound soundMsg;
 
 void poseCallback(const nav_msgs::Odometry::ConstPtr & pose_message){
 	odomPose.pose.pose.position.x=pose_message->pose.pose.position.x;
@@ -38,25 +38,18 @@ double degree2radian(double degreeAngle){
 	return (degreeAngle/57.2957795);
 }
 
-void bumperHit(const kobuki_msgs::BumperEvent &bumpMsg){
-    if(bumpMsg.state==1){
-
+double posFunc(double pos[3]){
         soundMsg.value = 4;
         sound_pub.publish(soundMsg);
         //gotta turn off the sound, or it will sometimes loop the sound
         soundMsg.value = 1;
         sound_pub.publish(soundMsg);
 
-    //init the variables for positions
-    double startX, startY, startAngle;
-
     //save the positions into the variables
-    startX = odomPose.pose.pose.position.x;
-    startY = odomPose.pose.pose.position.y;
-    startAngle = radian2degree(tf::getYaw(odomPose.pose.pose.orientation));   
-            ROS_INFO("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startX, startY, startAngle);
-    }
-
+    pos[0] = odomPose.pose.pose.position.x;
+    pos[1] = odomPose.pose.pose.position.y;
+    pos[2] = radian2degree(tf::getYaw(odomPose.pose.pose.orientation));   
+            //ROS_INFO("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startX, startY, startAngle);
 }
 
 int main(int argc, char *argv[])
@@ -64,17 +57,35 @@ int main(int argc, char *argv[])
     ros::init(argc,argv,"locate_d_area");
     srand(time(NULL));
     ros::NodeHandle n;
+    ros::Rate loop_rate(10);
     //advertisers
     sound_pub=n.advertise<kobuki_msgs::Sound> ("/mobile_base/commands/sound", 2);
-
+    vel_pub=n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/teleop",1);
     //subscribers
     poseSub=n.subscribe("/odom", 10, poseCallback);
-    bumperSub=n.subscribe("/mobile_base/events/bumper",1,bumperHit);
+    
     
 while(ros::ok())
 {
-  
+  std::cout << ("start finding start position\n");
+    for(int i=0;i<10;i++){
+      twist.linear.x = 1.0;
+      twist.angular.z = 0.0;
+      vel_pub.publish(twist);
+      loop_rate.sleep();
+      ros::spinOnce();
+    }
+    double startPos[3];
+    ros::Duration(3).sleep();
+    for(int i; 2 >= i; i++){
+       posFunc(startPos);
+       ros::spinOnce();
+    }
+    
+    std::cout << "robot current pose: (x = " << startPos[0] << "y = " << startPos[1] << "angle = " << startPos[2] << ")\n";
     ros::spinOnce();
+
+    return 0;
 
 }
 
