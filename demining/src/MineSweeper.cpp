@@ -8,6 +8,8 @@
 #include "stdlib.h"
 #include "time.h"
 #include <string>
+#include <sstream>
+#include <fstream> //Read/write on local files
 
 
 ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to see "jerk" movement
@@ -15,12 +17,12 @@ ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to s
 //Variable used :
 int running=1;
 const double PI = 3.14159265358979323846;
-std::string Text = "";        //Used to recive input
-line.reserve(20); //reserve 20 stoage space for the string 'line'
+std::string line = "";        //Used to recive input at 'line'
+std::string::line.reserve(20); //reserve 20 stoage space for the string 'line'
 int Current_Work = 101; //Variable used to check current work/
 int Last_Work = 0; //Variable used to check last work
-float AreaLenght = 0;   //Given area lenght
-float AreaWidth = 0;    //given area width
+float AreaLenght = 1;   //Given area lenght
+float AreaWidth = 1;    //given area width
 float StartX = 0.0;     //Start position
 float StartY = 0.0;     //Start position
 float currentPosX = 0.0;//Current position
@@ -28,6 +30,8 @@ float currentPosY = 0.0;//Current position
 //Color sensors
 bool first_color_saved = false;
 turtlesim::Color first_color;
+//Saving data
+std::ofstream myfile;
 
 
 int FoundMines = 0;     //Number of found mines
@@ -63,7 +67,8 @@ while(running){
 
 
  //---------------------------- NEW INPUT
-if( !std::getline(std::cin, line) ){
+//if( !std::getline(std::cin, line) ){ Virker ikke, næste linje er en test
+if( !std::cin.getline(line,20) ){
     std::cout << "You entered " + line << std::endl;
     if(input(line) != Current_Work){
         Last_Work = Current_Work;
@@ -100,7 +105,7 @@ case 001: //LOW BATTERY
     std::cout << "Low battery! \n Returning" <<
     for(int i=1, i<=3,i++){delay(500); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
     SaveData();
-    ChangeWork(404);
+    ChangeWork(808); //Changing to Return
 
     break;
 
@@ -120,6 +125,8 @@ case 002: //STOP
     break;
 
 case 707: //Shut down
+    StopAll();
+    SaveData();
     running=0;
     break;
 
@@ -153,7 +160,11 @@ while(ros::ok()){
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 //Functionscall :
 
-void Forward(){//move forward
+
+
+
+
+void Forward(){//moves forward
     ros::Time start = ros::Time::now();
     while(ros::Time::now() - start < ros::Duration(5.0)){
         geometry_msgs::Twist move;
@@ -168,7 +179,7 @@ void Forward(){//move forward
 }
 
 
-void TurnRight(){//turn right
+void TurnRight(){//turns right
     ros::Time start_turn = ros::Time::now();
     while(ros::Time::now() - start_turn < ros::Duration(4.0)){
         geometry_msgs::Twist move;
@@ -182,7 +193,7 @@ void TurnRight(){//turn right
     }
 }
 
-void TurnLeft(){//turn left
+void TurnLeft(){//turns left
     ros::Time start_turn = ros::Time::now();
     while(ros::Time::now() - start_turn < ros::Duration(4.0)){
         geometry_msgs::Twist move;
@@ -275,11 +286,36 @@ void ChangeWork(int ChangeAble){    //Function to change work
 }
 
 void StopAll(){                     //Function to stop all actions
+    std::cout << "Stopping All Actions and Movements" << std::endl;
+
 
 }
 
 void SaveData(){                    //Function to save data locally/Globally
-
+    int counter=1;
+    while(counter){
+        std::cout << "Saving Data" << std::endl;
+        myfile.open ("example.txt");
+        if(myfile.is_open()){
+            myfile << "Saving from this run. Date : ";
+            myfile << ros::Time::now() << std::endl;
+            myfile << "Found mines: " + FoundMines << std::endl;
+            myfile << "Area size:   " + AreaLenght + " X " + AreaWidth + "equals to : " + AreaLenght*AreaWidth + "m²" << std::endl;
+            myfile << "\n \n " << std::endl;
+            myfile.close();
+            counter=0;
+        }
+        else if(counter>=20){
+            std::cout << "ERROR - Creating file..." << std::endl;
+            myfile.open("example.txt", std::fstream::out);
+            counter=1;
+        }
+        else{
+           std::cout << "no connection to file" << std::endl;
+            counter++;
+        }
+        
+    }
 }
 
 
