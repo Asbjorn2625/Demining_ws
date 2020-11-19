@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     ros::Rate loop_rate(10);
     //advertisers
     sound_pub=n.advertise<kobuki_msgs::Sound> ("/mobile_base/commands/sound", 2);
-    vel_pub=n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/teleop",1);
+    vel_pub=n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/teleop",10);
     //subscribers
     poseSub=n.subscribe("/odom", 10, poseCallback);
     
@@ -68,21 +68,33 @@ int main(int argc, char *argv[])
 while(ros::ok())
 {
   std::cout << ("start finding start position\n");
-    for(int i=0;i<10;i++){
-      twist.linear.x = 1.0;
+
+    for(int i=0;i<50;i++){
+      twist.linear.x = -0.2;
       twist.angular.z = 0.0;
       vel_pub.publish(twist);
       loop_rate.sleep();
+    }
+
+    ros::spinOnce();
+    //double startingAngle = radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
+    //double currentAngle = 20.01;
+    for(int i; i<M_PI*10; i++){
+      twist.linear.x = 0.0;
+      twist.angular.z = 1.0;
+      vel_pub.publish(twist);
+      loop_rate.sleep();
       ros::spinOnce();
+      //currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
     }
     double startPos[3];
-    ros::Duration(3).sleep();
+    //ros::Duration(3).sleep();
     for(int i; 2 >= i; i++){
        posFunc(startPos);
        ros::spinOnce();
     }
     
-    std::cout << "robot current pose: (x = " << startPos[0] << "y = " << startPos[1] << "angle = " << startPos[2] << ")\n";
+    std::cout << "robot current pose: (x = " << startPos[0] << " y = " << startPos[1] << " angle = " << startPos[2] << ")\n";
     ros::spinOnce();
 
     return 0;
