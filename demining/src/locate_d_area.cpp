@@ -75,27 +75,56 @@ while(ros::ok())
       vel_pub.publish(twist);
       loop_rate.sleep();
     }
-
+    //get the start position
     ros::spinOnce();
-    //double startingAngle = radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
-    //double currentAngle = 20.01;
-    for(int i; i<M_PI*10; i++){
-      twist.linear.x = 0.0;
-      twist.angular.z = 1.0;
-      vel_pub.publish(twist);
-      loop_rate.sleep();
-      ros::spinOnce();
-      //currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
-    }
     double startPos[3];
     //ros::Duration(3).sleep();
     for(int i; 2 >= i; i++){
        posFunc(startPos);
-       ros::spinOnce();
     }
-    
-    std::cout << "robot current pose: (x = " << startPos[0] << " y = " << startPos[1] << " angle = " << startPos[2] << ")\n";
-    ros::spinOnce();
+    //std::cout << "robot current pose: (x = " << startPos[0] << " y = " << startPos[1] << " angle = " << startPos[2] << ")\n";
+    printf("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startPos[0], startPos[1], startPos[2]);
+
+    double wantedAngle=0;
+    //turning 180 degress
+    if(startPos[2] >=0){
+      wantedAngle = startPos[2]-180;
+    }else{
+      wantedAngle = startPos[2]+180;
+    }
+    std::cout << "Angle goal: " << wantedAngle << "\n";
+    double currentAngle = 0;
+    int errorFactor = 1;
+    ros::Time start_time = ros::Time::now();
+    while(currentAngle <= wantedAngle-errorFactor || currentAngle >=wantedAngle+errorFactor){
+      ros::spinOnce();
+      twist.linear.x = 0.0;
+      twist.angular.z = 1.0;
+      vel_pub.publish(twist);
+      //loop_rate.sleep();
+      
+      currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
+    }
+  std::cout << "angle reached: " << currentAngle << "\n";
+bool errors = true;
+int corners = 2;
+int mineZone[corners];
+while(errors == true){
+  while(true){
+  std::cout << "please input the size of the mine zone, in meters \n width: ";
+  std::cin >> mineZone[0];
+  std::cout << "m\n"
+    if(mineZone[0] > 10)
+    break;
+  std::cout << "height: ";
+  std::cin >> mineZone[1];
+  std::cout << "m\n"
+    if(mineZone[1] > 10)
+    break;
+    errors = false;
+    break;
+  }
+}
 
     return 0;
 
