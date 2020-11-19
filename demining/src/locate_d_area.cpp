@@ -52,6 +52,32 @@ double posFunc(double pos[3]){
             //ROS_INFO("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startX, startY, startAngle);
 }
 
+void moveForward(int lengthMeters){
+  for(int i=0;i<lengthMeters*50;i++){
+      twist.linear.x = 0.2;
+      twist.angular.z = 0.0;
+      vel_pub.publish(twist);
+      ros::Duration(0.1).sleep();
+    }
+}
+void moveBackward(int lengthMeters){
+  for(int i=0;i<lengthMeters*50;i++){
+      twist.linear.x = -0.2;
+      twist.angular.z = 0.0;
+      vel_pub.publish(twist);
+      ros::Duration(0.1).sleep();
+    }
+}
+void turn180deg(double currentAngle, double desiredAngle, int errorFactor){
+ while(currentAngle <= desiredAngle-errorFactor || currentAngle >=desiredAngle+errorFactor){
+      ros::spinOnce();
+      twist.linear.x = 0.0;
+      twist.angular.z = 1.0;
+      vel_pub.publish(twist);
+      currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
+    }
+}
+
 int main(int argc, char *argv[])
 {
     ros::init(argc,argv,"locate_d_area");
@@ -68,57 +94,40 @@ int main(int argc, char *argv[])
 while(ros::ok())
 {
   std::cout << ("start finding start position\n");
+  //start
+    moveBackward(1);
 
-    for(int i=0;i<50;i++){
-      twist.linear.x = -0.2;
-      twist.angular.z = 0.0;
-      vel_pub.publish(twist);
-      loop_rate.sleep();
-    }
     //get the start position
     ros::spinOnce();
     double startPos[3];
-    //ros::Duration(3).sleep();
     for(int i; 2 >= i; i++){
        posFunc(startPos);
     }
-    //std::cout << "robot current pose: (x = " << startPos[0] << " y = " << startPos[1] << " angle = " << startPos[2] << ")\n";
     printf("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startPos[0], startPos[1], startPos[2]);
 
-    double wantedAngle=0;
+
     //turning 180 degress
-    if(startPos[2] >=0){
-      wantedAngle = startPos[2]-180;
+    if(startPos[2] > 0){
+      std::cout << "Angle goal: " << startPos[2]-180 << "\n";
+      turn180deg(startPos[2],startPos[2]-180,1);
     }else{
-      wantedAngle = startPos[2]+180;
+      std::cout << "Angle goal: " << startPos[2]+180 << "\n";
+      turn180deg(startPos[2],startPos[2]+180,1);
     }
-    std::cout << "Angle goal: " << wantedAngle << "\n";
-    double currentAngle = 0;
-    int errorFactor = 1;
-    ros::Time start_time = ros::Time::now();
-    while(currentAngle <= wantedAngle-errorFactor || currentAngle >=wantedAngle+errorFactor){
-      ros::spinOnce();
-      twist.linear.x = 0.0;
-      twist.angular.z = 1.0;
-      vel_pub.publish(twist);
-      //loop_rate.sleep();
-      
-      currentAngle=radian2degree(tf::getYaw(odomPose.pose.pose.orientation));
-    }
-  std::cout << "angle reached: " << currentAngle << "\n";
+  std::cout << "angle reached: " << radian2degree(tf::getYaw(odomPose.pose.pose.orientation)) << "\n";
+
+//input for the mine zone
 bool errors = true;
 int corners = 2;
 int mineZone[corners];
 while(errors == true){
   while(true){
-  std::cout << "please input the size of the mine zone, in meters \n width: ";
+  std::cout << "please input the size of the mine zone, in meters \nwidth: ";
   std::cin >> mineZone[0];
-  std::cout << "m\n"
     if(mineZone[0] > 10)
     break;
   std::cout << "height: ";
   std::cin >> mineZone[1];
-  std::cout << "m\n"
     if(mineZone[1] > 10)
     break;
     errors = false;
