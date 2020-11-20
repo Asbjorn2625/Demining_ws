@@ -17,22 +17,14 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   tf
   nav_msgs
-  sensor_msgs
- # fstream
+  visualization_msgs
 )
 
 ###################################
 ## catkin specific configuration ##
 ###################################
-find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    sensor_msgs
-    std_msgs
-    cv_bridge
-    image_transport
-  )
 
-  find_package(OpenCV REQUIRED)
+ find_package(OpenCV REQUIRED)
 
   catkin_package()
 ###########
