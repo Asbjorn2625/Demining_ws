@@ -4,7 +4,7 @@
 //Following mimics what is found in DockDriveActionClient.py
 #include <actionlib/client/simple_action_client.h>
 #include <kobuki_msgs/AutoDockingAction.h>
-#include <kobuki_msgs/AutoDockingGoal.h> //May be uneeded
+#include <kobuki_msgs/AutoDockingGoal.h>
 
 typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient;
 
@@ -23,8 +23,6 @@ int main(int argc, char *argv[])
   
   std::cout << "Goal set" << std::endl; //check
 
-  // Fill in goal here <- from tutorial (no idea what it means)
-
   client.sendGoal(goal);
 
   std::cout << "Goal sent" << std::endl;//check
@@ -39,7 +37,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    std::cout << "Current State: " << client.getState().toString().c_str() << std::endl;
+    std::cout << "Error did not reach dock. Current State: " << client.getState().toString().c_str() << std::endl;
   }
 
   return 0;

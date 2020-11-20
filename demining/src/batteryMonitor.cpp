@@ -1,15 +1,19 @@
 #include <ros/ros.h>
 #include <iostream> //iostream present for testing purposes
 
-#include <kobuki_msgs/PowerSystemEvent.h>   //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
-#include <sensor_msgs/BatteryState.h>       //Currenty unused
+#include <kobuki_msgs/PowerSystemEvent.h> //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
+#include <sensor_msgs/BatteryState.h>     //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
+
+#include <actionlib/client/simple_action_client.h>//actionlib for 
+#include <kobuki_msgs/AutoDockingAction.h>//Used for the autodocking feature
+#include <kobuki_msgs/AutoDockingGoal.h>  //Used for the autodocking feature
+typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient; //dockingClient 
 
 // Current laptop battery charge topic /laptop_charge (/percentage)
 // Current kobuki battery charge topic /mobile_base/sensors/core/battery
 
 //Initialisation of global variables
 int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V) 
-int const laptop_max_charge = 200;        //Needs to be found
 bool fullyCharged = false;
 
 //Declaration of callback constants messagetypes
@@ -31,8 +35,22 @@ void headHomeToCharge()
 
   //If manual control is taken pause this task and resume afterwards
 
-  //Activate auto-docking procedure
-  //kobuki_msgs/AutoDocking.action http://docs.ros.org/en/api/kobuki_msgs/html/action/AutoDocking.html
+
+  dockingClient client("dock_drive_action", true);//Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
+  client.waitForServer();                         //Wait for feedback from the Action server
+  kobuki_msgs::AutoDockingGoal goal;              //Sets docking as the goal
+  
+  client.sendGoal(goal);  //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
+  client.waitForResult(); //ros::Duration(5.0) for maximum wait time?
+
+  if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
+    std::cout << "Turtlebot reached dock, and is charging" << std::endl;
+  }
+  else
+  {
+    std::cout << "Error did not reach dock. Current State: " << client.getState().toString().c_str() << std::endl;
+  }
 }
 
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
@@ -87,6 +105,7 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 
     headHomeToCharge(); //Send robot home to recharge laptop
   }
+  //Is charging?
 }
 
 /* attempt at better solution for kobuki base battery
@@ -108,7 +127,6 @@ int main(int argc, char *argv[])
   
   //More precise battery function with percentage option
   //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core", 10, callbackKobukiBat);
-
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
