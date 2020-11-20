@@ -181,8 +181,9 @@ while(ros::ok())
     for(int i; 2 >= i; i++){
        posFunc(startPos);
     }
-    printf("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startPos[0], startPos[1], startPos[2]);
-    setPoint(startPos[0], startPos[1], 0.2);
+  moveToGoal(startPos[0],startPos[1]+1.0);
+    printf("robot current pose: (x = %.2f, y = %.2f, angle = %.2f)\n", startPos[0], startPos[1]+1.0, startPos[2]);
+    setPoint(startPos[0], startPos[1]+1.0, 0.2);
 
 //reset_pub.publish(reset_msg);
   /*
