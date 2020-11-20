@@ -11,6 +11,7 @@ cv::Mat HSVImage;
 cv::Mat ThreshImage;
 
 static const std::string OPENCV_WINDOW = "Image window";
+static const std::string RED_Vision = "detect window";
 
 class ImageConverter
 {
@@ -24,16 +25,18 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.su/ */bscribe("/camera/rgb/image_raw", 1,
+    image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1,
       &ImageConverter::imageCb, this);
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
     cv::namedWindow(OPENCV_WINDOW);
+    cv::namedWindow(RED_Vision);
   }
 
   ~ImageConverter()
   {
     cv::destroyWindow(OPENCV_WINDOW);
+    cv::destroyWindow(RED_Vision);
   }
 
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
@@ -48,14 +51,16 @@ public:
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-    //goes from RGB to HSV filter
-    cv::cvtColor(cv_ptr->image,HSVImage,CV_BGR2HSV);
+   
+    //goes from BGR to HSV filter
+    cv::cvtColor(cv_ptr->image , HSVImage , CV_BGR2HSV);
     //For red i think
-     cv::inRange(HSVImage, cv::Scalar(354, 100, 32), cv::Scalar(354, 100, 100), ThreshImage);
+     cv::inRange(HSVImage, cv::Scalar(0, 177, 92), cv::Scalar(180, 255, 255), ThreshImage);
 
 
     // Update GUI Window
     cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+    cv::imshow(RED_Vision, HSVImage);
     cv::waitKey(3);
 
 

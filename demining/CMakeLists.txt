@@ -8,16 +8,13 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   turtlesim
-<<<<<<< HEAD
   sensor_msgs
   cv_bridge
   std_msgs
   image_transport
-=======
   geometry_msgs
   move_base_msgs 
   actionlib
->>>>>>> origin/main
 )
 
 ###################################
@@ -44,24 +41,20 @@ include_directories(
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
 add_executable(hello_world src/hello_world.cpp)
+add_executable(calibration src/calibration.cpp)
 #add_executable(MineSweeper src/MineSweeper.cpp)
-<<<<<<< HEAD
-=======
 add_executable(locate_d_area src/locate_d_area.cpp)
->>>>>>> origin/main
 # Link to Catkin libraries
 target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 #target_link_libraries(MineSweeper
  # ${catkin_LIBRARIES}
 #)
-<<<<<<< HEAD
-=======
 
 target_link_libraries(locate_d_area
   ${catkin_LIBRARIES}
 )
->>>>>>> origin/main
 
 
 
@@ -70,7 +63,7 @@ target_link_libraries(locate_d_area
 ############w#
 
 # Mark executables for installation
-install(TARGETS hello_world locate_d_area
+install(TARGETS hello_world locate_d_area calibration
 
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
