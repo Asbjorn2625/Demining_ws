@@ -18,7 +18,7 @@ ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to s
 int running=1;
 const double PI = 3.14159265358979323846;
 std::string line = "";        //Used to recive input at 'line'
-std::string::line.reserve(20); //reserve 20 stoage space for the string 'line'
+std::string line.reserve(20); //reserve 20 stoage space for the string 'line'
 int Current_Work = 101; //Variable used to check current work/
 int Last_Work = 0; //Variable used to check last work
 float AreaLenght = 1;   //Given area lenght
@@ -36,12 +36,17 @@ std::ofstream myfile;
 
 int FoundMines = 0;     //Number of found mines
 
+//Other bots locations
+int BotLocation=0;
+float BotX=0;
+float BotY=0;
 
 
 //CONNECTION --> 
-//Publisher
+//Publishers
 ros::Publisher cmd_vel_pub;
-//Subscriber
+ros::Publisher movement_pub;
+//Subscribers
 
 
 //roslaunch turtlebot_bringup minimal.launch
@@ -68,8 +73,8 @@ while(running){
 
  //---------------------------- NEW INPUT
 //if( !std::getline(std::cin, line) ){ Virker ikke, næste linje er en test
-if( !std::cin.getline(line,20) ){
-    std::cout << "You entered " + line << std::endl;
+if( !std::getline(std::cin,line)){
+    std::cout << "You entered " << line << std::endl;
     if(input(line) != Current_Work){
         Last_Work = Current_Work;
         Current_Work = input(line);
@@ -93,17 +98,29 @@ case 404: //MineSweep
     break;
 
 case 909: //RetrivOtherBot
+    StopAll();
+    GoTo(BotX, BotY);
+    if(BotX==currentPosX && BotY==currentPosY){
+        std::cout << "Arrived to Bot" << std::endl;
+        ChangeWork(002); //Changing to Stop
+    }
 
     break;
 
 case 808: //Return
+    StopAll();
+    GoTo(StartX, StartY); //Go to starting position
+    if(StartX==currentPosX && StartY==currentPosY){
+        std::cout << "Returned to Start" << std::endl;
+        ChangeWork(002); //Changing to Stop
+    }
 
     break;
 
 case 001: //LOW BATTERY
     StopAll();
-    std::cout << "Low battery! \n Returning" <<
-    for(int i=1, i<=3,i++){delay(500); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
+    std::cout << "Low battery! \n Returning" << std::endl;
+    for(int i=1; i<=3; i++){ros::Duration(0.5).sleep(); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
     SaveData();
     ChangeWork(808); //Changing to Return
 
@@ -115,10 +132,12 @@ case 505: //Manual Takeover
 
 case 002: //STOP
     StopAll();
+    std::cout << "Stopped" << std::endl;
+    std::cout << "Waiting for instructions" << std::endl;    
     while(Current_Work = 002){
         if( !std::getline(std::cin, line) ){    //Stopping all actions and waiting for indput
-            std::cout << "You entered " + line << std::endl;
-            ChangeWork(line);
+            std::cout << "You entered " << line << std::endl;
+            ChangeWork(input(line));
         }
     }
 
@@ -128,6 +147,7 @@ case 707: //Shut down
     StopAll();
     SaveData();
     running=0;
+    std::cout << "Shutting down..." << std::endl;
     break;
 
 default:
@@ -236,28 +256,47 @@ void Sensor1(){                 //Used to recive data from Sensor1
 
 
 int input(std::string text){ //Will compare input with sub-function names and return sub-function number
-if (text == "MineSweep"){
+if (text == "MineSweep" || text =="minesweep"){
     return 404;
 }
-else if(text == "Retrive"){
+else if(text == "Retrive" || text =="retrive"){
+    if(BotLocation){
+        std::cout << "Found Bot at location : " << BotX << "," << BotY << std::endl;
+        std::cout << "Use this location? (y/n)" << std::endl;
+        std::getline(std::cin, line);
+        if(line=="y"){
+            std::cout << "Using : " << BotX << "," << BotY << " as location." << std::endl;
+        }
+        else if(line!="y" || line!="n"){
+            std::cout << "Try again" << std::endl;
+        }
+    }
+    else{
+        std::cout << "Please input X-Coordinate of bot : " << std::endl;
+        std::cin >> BotX;
+        std::cout << "Please input Y-Coordinate of bot : " << std::endl;
+        std::cin >> BotY;
+        std::cout << "Using : " << BotX << "," << BotY << " as location." << std::endl;
+    }
+
     return 909;
 }
-else if(text == "Return"){
+else if(text == "Return" || text =="return"){
     return 808;
 }
-else if(text == "Low Battery"){
+else if(text == "Low Battery" || text =="low battery"){
     return 001;
 }
-else if(text == "Manual"){
+else if(text == "Manual" || text =="manual"){
     return 505;
 }
-else if(text == "Scan Area"){
+else if(text == "Scan Area" || text =="scan area"){
     return 101;
 }
-else if(text == "STOP"){
+else if(text == "STOP" || text =="stop" || text =="Stop"){
     return 002;
 }
-else if(text == "Shut down"){
+else if(text == "Shut down" || text == "shut down"){
     return 707;
 }
 else{
@@ -280,6 +319,7 @@ void ChangeWork(int ChangeAble){    //Function to change work
     if(ChangeAble != Current_Work){
         Last_Work = Current_Work;
         Current_Work = ChangeAble;
+        std::cout << "Changed work to " << NameTag(Current_Work);
         rate.sleep();
     }
 
@@ -291,16 +331,15 @@ void StopAll(){                     //Function to stop all actions
 
 }
 
-void SaveData(){                    //Function to save data locally/Globally
+void SaveData(){                    //Function to save data locally on a file
     int counter=1;
     while(counter){
         std::cout << "Saving Data" << std::endl;
         myfile.open ("example.txt");
         if(myfile.is_open()){
-            myfile << "Saving from this run. Date : ";
-            myfile << ros::Time::now() << std::endl;
-            myfile << "Found mines: " + FoundMines << std::endl;
-            myfile << "Area size:   " + AreaLenght + " X " + AreaWidth + "equals to : " + AreaLenght*AreaWidth + "m²" << std::endl;
+            myfile << "Saving from this run. Date/time : " << ros::Time::now() << std::endl;
+            myfile << "Found mines: " << FoundMines << std::endl;
+            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << "equals to : " + AreaLenght*AreaWidth + "m²" << std::endl;
             myfile << "\n \n " << std::endl;
             myfile.close();
             counter=0;
@@ -320,7 +359,17 @@ void SaveData(){                    //Function to save data locally/Globally
 
 
 
+std::string NameTag(int Worknumb){
+    if(Worknumb == 404) {return "MineSweep";}
+    else if(Worknumb==909){return "Retrive";}
+    else if(Worknumb==808){return "Return";}
+    else if(Worknumb==001){return "Low Battery";}
+    else if(Worknumb==505){return "Manual";}
+    else if(Worknumb==101){return "Scan Area";}
+    else if(Worknumb==002){return "STOP";}
+    else if(Worknumb==707){return "Shut Down";}
 
+}
 
 
 
