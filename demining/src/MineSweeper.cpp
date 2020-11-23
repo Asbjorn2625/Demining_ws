@@ -18,7 +18,7 @@ ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to s
 int running=1;
 const double PI = 3.14159265358979323846;
 std::string line = "";        //Used to recive input at 'line'
-std::string line.reserve(20); //reserve 20 stoage space for the string 'line'
+//std::string line.reserve(20); //reserve 20 stoage space for the string 'line'
 int Current_Work = 101; //Variable used to check current work/
 int Last_Work = 0; //Variable used to check last work
 float AreaLenght = 1;   //Given area lenght
@@ -41,13 +41,13 @@ int BotLocation=0;
 float BotX=0;
 float BotY=0;
 
-
+/*
 //CONNECTION --> 
 //Publishers
 ros::Publisher cmd_vel_pub;
 ros::Publisher movement_pub;
 //Subscribers
-
+*/
 
 //roslaunch turtlebot_bringup minimal.launch
 
@@ -87,10 +87,17 @@ if( !std::getline(std::cin,line)){
 
 
 
-switch (Current_Work){       //Switch to change program funktion
+switch (Current_Work){      //Switch to change program funktion
                             //(Scan_area / Sweep the area Etc.)
 case 101: //Scan Area
-    
+    std::cout << "Scanning Area" << std::endl;
+
+    if(AreaLenght || AreaWidth){
+    std::cout << "Area Scanned" << std::endl;
+    std::cout << "Lenght is : " << AreaLenght << std::endl;
+    std::cout << "Width is  : " << AreaWidth << std::endl;
+    return 404;
+    }
     break;
 
 case 404: //MineSweep
@@ -150,7 +157,7 @@ case 707: //Shut down
     std::cout << "Shutting down..." << std::endl;
     break;
 
-default:
+default: //FEJL
     std::cout << "ERROR" << std::endl;
     break;
 }
@@ -183,7 +190,7 @@ while(ros::ok()){
 
 
 
-
+/*
 void Forward(){//moves forward
     ros::Time start = ros::Time::now();
     while(ros::Time::now() - start < ros::Duration(5.0)){
@@ -226,6 +233,7 @@ void TurnLeft(){//turns left
         rate.sleep();
     }
 }
+*/
 
 float distance(){      // distance to start position
     float numb = sqrt((StartX-currentPosX)*(StartX-currentPosX) + (StartX-currentPosX)*(StartX-currentPosX));
@@ -244,7 +252,7 @@ void GoTo(float newX, float newY){ //Go to given location
 
 
 
-
+/*
 void Sensor1(){                 //Used to recive data from Sensor1
  if(!first_color_saved){
     first_color = sensed_color;
@@ -252,10 +260,10 @@ void Sensor1(){                 //Used to recive data from Sensor1
   }
 
 }
+*/
 
 
-
-int input(std::string text){ //Will compare input with sub-function names and return sub-function number
+int input(std::string text){    //Will compare input with sub-function names and return sub-function number
 if (text == "MineSweep" || text =="minesweep"){
     return 404;
 }
@@ -299,7 +307,7 @@ else if(text == "STOP" || text =="stop" || text =="Stop"){
 else if(text == "Shut down" || text == "shut down"){
     return 707;
 }
-else{
+else{                               //Print out input options if wrong
     std::cout << "Wrong input." << std::endl;
     std::cout << "Try one of following commands :" << std::endl;
     std::cout << "Scan Area" << std::endl;
@@ -339,7 +347,7 @@ void SaveData(){                    //Function to save data locally on a file
         if(myfile.is_open()){
             myfile << "Saving from this run. Date/time : " << ros::Time::now() << std::endl;
             myfile << "Found mines: " << FoundMines << std::endl;
-            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << "equals to : " + AreaLenght*AreaWidth + "m²" << std::endl;
+            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << "equals to : " << AreaLenght*AreaWidth << "m²" << std::endl;
             myfile << "\n \n " << std::endl;
             myfile.close();
             counter=0;
@@ -359,7 +367,7 @@ void SaveData(){                    //Function to save data locally on a file
 
 
 
-std::string NameTag(int Worknumb){
+std::string NameTag(int Worknumb){  // Print out name of function from function number
     if(Worknumb == 404) {return "MineSweep";}
     else if(Worknumb==909){return "Retrive";}
     else if(Worknumb==808){return "Return";}
@@ -383,4 +391,4 @@ std::string NameTag(int Worknumb){
 - Move a certain distance, turn, then move (Odometry topic)
         https://answers.ros.org/question/205132/move-a-certain-distance-turn-then-move-odometry-topic/?answer=269733
 
-*/
+*/ 
