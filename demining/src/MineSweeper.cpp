@@ -190,7 +190,7 @@ while(ros::ok()){
 
 
 
-/*
+
 void Forward(){//moves forward
     ros::Time start = ros::Time::now();
     while(ros::Time::now() - start < ros::Duration(5.0)){
@@ -233,7 +233,6 @@ void TurnLeft(){//turns left
         rate.sleep();
     }
 }
-*/
 
 float distance(){      // distance to start position
     float numb = sqrt((StartX-currentPosX)*(StartX-currentPosX) + (StartX-currentPosX)*(StartX-currentPosX));
@@ -252,7 +251,7 @@ void GoTo(float newX, float newY){ //Go to given location
 
 
 
-/*
+
 void Sensor1(){                 //Used to recive data from Sensor1
  if(!first_color_saved){
     first_color = sensed_color;
@@ -260,7 +259,7 @@ void Sensor1(){                 //Used to recive data from Sensor1
   }
 
 }
-*/
+
 
 
 int input(std::string text){    //Will compare input with sub-function names and return sub-function number
@@ -368,7 +367,7 @@ void SaveData(){                    //Function to save data locally on a file
 
 
 std::string NameTag(int Worknumb){  // Print out name of function from function number
-    if(Worknumb == 404) {return "MineSweep";}
+         if(Worknumb==404){return "MineSweep";}
     else if(Worknumb==909){return "Retrive";}
     else if(Worknumb==808){return "Return";}
     else if(Worknumb==001){return "Low Battery";}
