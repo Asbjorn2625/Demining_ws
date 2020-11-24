@@ -41,23 +41,14 @@ include_directories(
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
 add_executable(hello_world src/hello_world.cpp)
-add_executable(Hello_world src/Hello_world.cpp)
 add_executable(calibration src/calibration.cpp)
-#add_executable(MineSweeper src/MineSweeper.cpp)
+add_executable(MineSweeper src/MineSweeper.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 # Link to Catkin libraries
 target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-target_link_libraries(Hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES}))
 target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-#target_link_libraries(MineSweeper ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-
-#target_link_libraries(MineSweeper
- # ${catkin_LIBRARIES}
-#)
-
-target_link_libraries(locate_d_area
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(MineSweeper ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(locate_d_area ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 
 
@@ -66,13 +57,7 @@ target_link_libraries(locate_d_area
 ############w#
 
 # Mark executables for installation
-install(TARGETS hello_world Hello_world locate_d_area calibration
+install(TARGETS hello_world locate_d_area calibration MineSweeper
 
 
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
-)
-
-#install(TARGETS MineSweeper
-
- # RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
