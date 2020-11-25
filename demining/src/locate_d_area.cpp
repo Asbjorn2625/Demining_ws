@@ -78,7 +78,7 @@ else if(oriantation == "Backwards"){
 
 }
 
-void moveToMap(double posX, double posY, const char* oriantation){
+void moveToMap(double posX, double posY){
  MoveBaseClient ac("move_base", true);
 
   //wait for the action server to come up
@@ -96,21 +96,6 @@ move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.pose.position.x = posX;
   goal.target_pose.pose.position.y = posY;
 
-//orientation based on Quaternions http://wiki.ogre3d.org/Quaternion+and+Rotation+Primer
-if(oriantation == "Right"){
-	goal.target_pose.pose.orientation.w = -sqrt(0.5);
-	goal.target_pose.pose.orientation.z = sqrt(0.5);
-}else if(oriantation == "Left"){
-	goal.target_pose.pose.orientation.w = sqrt(0.5);
-	goal.target_pose.pose.orientation.z = -sqrt(0.5);
-}
-else if(oriantation == "Backwards"){
-	goal.target_pose.pose.orientation.w = 0;
-	goal.target_pose.pose.orientation.z = 1;	
-}else{
-	goal.target_pose.pose.orientation.w = 1;
-	goal.target_pose.pose.orientation.z = 0;	
-}
   ROS_INFO("Sending goal");
   ac.sendGoal(goal);
 
@@ -217,7 +202,7 @@ while(errors == true){
   ros::spinOnce();
   start.getPosition(startPositions);
   printf("robot pose: (%.2f, %.2f)\n", startPositions[0], startPositions[1]);
-  start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a maps
+  start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a map
   ros::spinOnce();
   start.getPosition(minePositions);
   printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
@@ -255,7 +240,7 @@ for (int i=1;i<pointsOnMap/2; i=i+2){
 }
 for (int i =0;i<pointsOnMap;i++){
   loop_rate.sleep();
-  start.moveToMap(xPoint[i],yPoint[i],"Right");
+  start.moveToMap(xPoint[i],yPoint[i]);
 }
 		ros::spinOnce();loop_rate.sleep();ros::spinOnce();
 		//printf("robot final pose: (%.2f, %.2f, %.2f)\n", turtlebot_odom_pose.pose.pose.position.x, turtlebot_odom_pose.pose.pose.position.y,radian2degree(tf::getYaw(turtlebot_odom_pose.pose.pose.orientation)));
