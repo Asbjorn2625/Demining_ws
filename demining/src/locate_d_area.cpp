@@ -209,10 +209,13 @@ while(errors == true){
   //moving according to the map
   double startPositions[3];
   double minePositions[3];
+  int pointsOnMap = mineZone[0]*4;
+  double xPoint[pointsOnMap];
+  double yPoint[pointsOnMap];
   ros::spinOnce();
   start.getPosition(startPositions);
   printf("robot pose: (%.2f, %.2f)\n", startPositions[0], startPositions[1]);
-  start.moveTo(-1.0, 0.0, "Backwards");
+  start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a maps
   ros::spinOnce();
   start.getPosition(minePositions);
   printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
@@ -223,17 +226,13 @@ while(errors == true){
   double heading =atan2(y_distance,x_distance);
   ROS_INFO("heading (%2f)", heading);
 
-  double xPoint1;
-  double xPoint2;
-  double yPoint1;
-  double yPoint2;
   if(heading < 0){
       //first point
-  xPoint1 = minePositions[0]+mineZone[1]*sin(heading);
-  yPoint1 = minePositions[1]+mineZone[1]*cos(heading);
+  xPoint[i] = minePositions[0]+mineZone[1]*sin(heading);
+  yPoint[i] = minePositions[1]+mineZone[1]*cos(heading);
   }else if(heading > 0){
-  xPoint1 = minePositions[0]+mineZone[1]*cos(heading);
-  yPoint1 = minePositions[1]+mineZone[1]*sin(heading);
+  xPoint[i] = minePositions[0]+mineZone[1]*cos(heading);
+  yPoint[i] = minePositions[1]+mineZone[1]*sin(heading);
   }else{
     std::cout << "failed angle \n";
   }
@@ -241,19 +240,19 @@ while(errors == true){
 //second point
   if(heading-M_PI/2 < 0){
       //first point
-  xPoint2 = xPoint1+mineZone[1]*sin(heading-M_PI/2);
-  yPoint2 = yPoint1+mineZone[1]*cos(heading-M_PI/2);
+  xPoint[i+1] = xPoint[i]+mineZone[1]*sin(heading-M_PI/2);
+  yPoint[i+1] = yPoint[i]+mineZone[1]*cos(heading-M_PI/2);
   }else if(heading > 0){
-  xPoint2 = xPoint1+mineZone[1]*cos(heading-M_PI/2);
-  yPoint2 = yPoint1+mineZone[1]*sin(heading-M_PI/2);
+  xPoint[i+1] = xPoint[i]+mineZone[1]*cos(heading-M_PI/2);
+  yPoint[i+1] = yPoint[i]+mineZone[1]*sin(heading-M_PI/2);
   }else{
     std::cout << "failed angle \n";
   }
-printf("location 1 = (%f,%f) location 2 = (%f,%f)\n", xPoint1,yPoint1,xPoint2,yPoint2);
+printf("location 1 = (%f,%f) location 2 = (%f,%f)\n", xPoint[i],yPoint[i],xPoint[i+1],yPoint[i+1]);
   loop_rate.sleep();
-  start.moveToMap(xPoint1,yPoint1,"Right");
+  start.moveToMap(xPoint[i],yPoint[i],"Right");
 loop_rate.sleep();
-start.moveToMap(xPoint2,yPoint2,"Right");
+start.moveToMap(xPoint[i+1],yPoint[i+1],"Right");
 
 		ros::spinOnce();loop_rate.sleep();ros::spinOnce();
 		//printf("robot final pose: (%.2f, %.2f, %.2f)\n", turtlebot_odom_pose.pose.pose.position.x, turtlebot_odom_pose.pose.pose.position.y,radian2degree(tf::getYaw(turtlebot_odom_pose.pose.pose.orientation)));
