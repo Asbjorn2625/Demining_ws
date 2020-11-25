@@ -38,6 +38,7 @@ add_executable(calibration src/calibration.cpp)
 #add_executable(MineSweeper src/MineSweeper.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 add_executable(batteryMonitor src/batteryMonitor.cpp)
+add_executable(coordinatePublisher src/coordinatePublisher.cpp)
 
 # Link to Catkin libraries
 target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
@@ -45,6 +46,7 @@ target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 #target_link_libraries(MineSweeper ${catkin_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES})
 target_link_libraries(batteryMonitor ${catkin_LIBRARIES})
+target_link_libraries(coordinatePublisher ${catkin_LIBRARIES})
 
 
 #############
@@ -59,4 +61,5 @@ install(TARGETS hello_world locate_d_area calibration
 )
 
 install(TARGETS batteryMonitor RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(TARGETS coordinatePublisher RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #install(TARGETS MineSweeper RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
