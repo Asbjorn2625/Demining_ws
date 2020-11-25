@@ -5,11 +5,15 @@
 #include <turtlesim/Color.h>
 #include <turtlesim/SetPen.h>
 #include <iostream>
+//#include <conio.h> //Not recommented but should be able to read if input is avaliable
 #include "stdlib.h"
+#include <stdio.h> // To input shit
 #include "time.h"
 #include <string>
 #include <sstream>
 #include <fstream> //Read/write on local files
+#include "std_msgs/String.h" //SubScribe input from others
+#include "kobuki_msgs/BumperEvent.h"
 
 
 
@@ -18,8 +22,9 @@
 int running=1;
 const double PI = 3.14159265358979323846;
 std::string line = "";        //Used to recive input at 'line'
-//std::string line.reserve(20); //reserve 20 stoage space for the string 'line'
-int Current_Work = 101; //Variable used to check current work/
+std::string BumberDATA;         //
+//std::string line.reserve(20); //reserve 20 stoage space for the string 'line' (Buffer)
+int Current_Work = 002; //Variable used to check current work/
 int Last_Work = 0; //Variable used to check last work
 float AreaLenght = 1;   //Given area lenght
 float AreaWidth = 1;    //given area width
@@ -116,7 +121,7 @@ else if(text == "Shut down" || text == "shut down"){
     return 707;
 }
 else{                               //Print out input options if wrong
-    std::cout << "Wrong input." << "\n";
+    std::cout << "                                      !!!WRONG INPUT!!!." << "\n";
     std::cout << "Try one of following commands :" << "\n";
     std::cout << "Scan Area" << "\n";
     std::cout << "MineSweep" << "\n";
@@ -125,7 +130,8 @@ else{                               //Print out input options if wrong
     std::cout << "Low Battery" << "\n";
     std::cout << "Manual" << "\n";
     std::cout << "STOP" << "\n";
-    std::cout << "Shut down" << "\n";
+    std::cout << "Shut down" << "\n\n";
+    return Current_Work;
 }
 
 }
@@ -186,6 +192,17 @@ void SaveData(){                    //Function to save data locally on a file
 }
 
 
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+//Subscriber inputez
+
+void chatterCallBack(const std_msgs::String::ConstPtr& msg){
+    ROS_INFO("I heard this : [%s]", msg->data.c_str());
+    if(msg->data.c_str()!=line){
+    line = msg->data.c_str();
+        std::cout <<"line is equal to : " << line << "\n";
+    }
+}
+
 
 
 
@@ -202,7 +219,10 @@ ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to s
 
 //Publishers
 //ros::Publisher
+
 //subscribers
+ros::Subscriber UserInputSub = n.subscribe("chatter", 1000, chatterCallBack);
+//ros::Subscriber BumberROBSub = n.subscribe("/mobile_base/events/bumper", 1000, BumberROBSubCallBack);
 //ros::Subscriber
 
 
@@ -212,20 +232,24 @@ while(ros::ok()){
 
 
  //---------------------------- NEW INPUT
-//if( !std::getline(std::cin, line) ){ Virker ikke, næste linje er en test
-/*if( !std::getline(std::cin,line)){
-    std::cout << "You entered " << line << "\n";
+/*
+if(sub!=""){
+    //std::getline(std::cin, line);
+    //line = msg->data.c_str();
+    std::cout << "You entered : " << line << "\n";
     if(input(line) != Current_Work){
         Last_Work = Current_Work;
         Current_Work = input(line);
         rate.sleep();
     }
-}*/
+}
+*/
+ros::spinOnce();
+//UserInputSub;
 
 
 
-
-
+ROS_INFO("Running case: [%i]", Current_Work);
 
 switch (Current_Work){      //Switch to change program funktion
                             //(Scan_area / Sweep the area Etc.)
@@ -241,6 +265,7 @@ case 101: //Scan Area
     break;
 
 case 404: //MineSweep
+    std::cout << "demining..." << "\n";
 
     break;
 
@@ -251,7 +276,6 @@ case 909: //RetrivOtherBot
         std::cout << "Arrived to Bot" << "\n";
         ChangeWork(002); //Changing to Stop
     }
-
     break;
 
 case 808: //Return
@@ -280,12 +304,17 @@ case 505: //Manual Takeover
 case 002: //STOP
     StopAll();
     std::cout << "Stopped" << "\n";
-    std::cout << "Waiting for instructions" << "\n";    
-    while(Current_Work = 002){
-        if( !std::getline(std::cin, line) ){    //Stopping all actions and waiting for indput
-            std::cout << "You entered " << line << "\n";
-            ChangeWork(input(line));
-        }
+    std::cout << "Waiting for instructions :" << "\n";    
+    while(Current_Work == 002){
+        //std::cout << "STOP - Waiting position :-(" << "\n";
+        //std::cout << "Current Work is: " << Current_Work << "\n";
+        //UserInputSub;
+        std::cout <<"line is equal to : " << line << "\n";        
+        ros::spinOnce();
+        //std::getline(std::cin, line);   //Stopping all actions and waiting for indput
+        //    std::cout << "\n You entered : " << line << "\n\n";
+        ChangeWork(input(line));
+        
     }
 
     break;
@@ -298,7 +327,7 @@ case 707: //Shut down
     break;
 
 default: //FEJL
-    std::cout << "ERROR" << "\n";
+    std::cout << "                         !!!ERROR!!!" << "\n";
     break;
 }
 
