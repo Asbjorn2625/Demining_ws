@@ -1,0 +1,6 @@
+devel_space: /home/ros/project/devel
+install: false
+install_space: /home/ros/project/install
+profile: default
+source_space: /home/ros/project/src
+workspace: /home/ros/project

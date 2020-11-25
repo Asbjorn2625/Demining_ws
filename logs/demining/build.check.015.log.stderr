@@ -1,0 +1,13 @@
+[31m[1mCMake Error[0m at /home/ros/project/src/demining/CMakeLists.txt:42 (add_executable):
+  add_executable cannot create target "ftest" because another target with the
+  same name already exists.  The existing target is an executable created in
+  source directory "/home/ros/project/src/demining".  See documentation for
+  policy CMP0002 for more details.
+
+
+[31m[1mCMake Error[0m at /home/ros/project/src/demining/CMakeLists.txt:51 (target_link_libraries):
+  Cannot specify link libraries for target "ftest2" which is not built by
+  this project.
+
+
+make: *** [cmake_check_build_system] Error 1

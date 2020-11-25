@@ -1,0 +1,6 @@
+make[2]: *** No rule to make target '/home/ros/project/src/demining/src/ftest.cpp', needed by 'CMakeFiles/ftest.dir/src/ftest.cpp.o'.  Stop.
+make[1]: *** [CMakeFiles/ftest.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+make[2]: *** No rule to make target '/home/ros/project/src/demining/src/hello_world.cpp', needed by 'CMakeFiles/hello_world.dir/src/hello_world.cpp.o'.  Stop.
+make[1]: *** [CMakeFiles/hello_world.dir/all] Error 2
+make: *** [all] Error 2

@@ -1,0 +1,18 @@
+[35m[1mScanning dependencies of target fakeObj[0m
+[  7%] [32mBuilding CXX object CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o[0m
+[ 21%] Built target ftest2
+[ 35%] Built target ftest
+[ 50%] Built target hello_world
+[ 64%] Built target batteryMonitor
+[ 78%] Built target calibration
+[ 92%] Built target locate_d_area
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:69:7:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K;[m[K’ before ‘[01m[K}[m[K’ token
+       }
+[01;32m[K       ^[m[K
+CMakeFiles/fakeObj.dir/build.make:62: recipe for target 'CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o' failed
+make[2]: *** [CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o] Error 1
+CMakeFiles/Makefile2:67: recipe for target 'CMakeFiles/fakeObj.dir/all' failed
+make[1]: *** [CMakeFiles/fakeObj.dir/all] Error 2
+Makefile:138: recipe for target 'all' failed
+make: *** [all] Error 2

@@ -1,0 +1,13 @@
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:[m[K In function ‘[01m[Kint main(int, const char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:16:33:[m[K [01;31m[Kerror: [m[Kinvalid conversion from ‘[01m[Kconst char**[m[K’ to ‘[01m[Kchar**[m[K’ [-fpermissive]
+ ros::init(argc, argv, "listener");
+[01;32m[K                                 ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/node_handle.h:47:0[m[K,
+                 from [01m[K/opt/ros/kinetic/include/ros/ros.h:45[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/init.h:83:18:[m[K [01;36m[Knote: [m[K  initializing argument 2 of ‘[01m[Kvoid ros::init(int&, char**, const string&, uint32_t)[m[K’
+ ROSCPP_DECL void init(int &argc, char **argv, const std::string& name, uint32_t options = 0);
+[01;32m[K                  ^[m[K
+make[2]: *** [CMakeFiles/ftest2.dir/src/ftest2.cpp.o] Error 1
+make[1]: *** [CMakeFiles/ftest2.dir/all] Error 2
+make: *** [all] Error 2

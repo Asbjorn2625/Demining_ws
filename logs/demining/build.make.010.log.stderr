@@ -1,0 +1,34 @@
+[01m[K/home/ros/project/src/demining/src/ftest.cpp:[m[K In function ‘[01m[Kint main(int, const char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/ftest.cpp:12:35:[m[K [01;31m[Kerror: [m[Kinvalid conversion from ‘[01m[Kconst char**[m[K’ to ‘[01m[Kchar**[m[K’ [-fpermissive]
+     ros::init(argc, argv, "talker");
+[01;32m[K                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/node_handle.h:47:0[m[K,
+                 from [01m[K/opt/ros/kinetic/include/ros/ros.h:45[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/init.h:83:18:[m[K [01;36m[Knote: [m[K  initializing argument 2 of ‘[01m[Kvoid ros::init(int&, char**, const string&, uint32_t)[m[K’
+ ROSCPP_DECL void init(int &argc, char **argv, const std::string& name, uint32_t options = 0);
+[01;32m[K                  ^[m[K
+[01m[K/home/ros/project/src/demining/src/ftest.cpp:20:79:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Kros::NodeHandle::advertise(const char [14])[m[K’
+     ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter, 1000");
+[01;32m[K                                                                               ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:249:15:[m[K [01;36m[Knote: [m[Kcandidate: template<class M> ros::Publisher ros::NodeHandle::advertise(const string&, uint32_t, bool)
+     Publisher advertise(const std::string& topic, uint32_t queue_size, bool latch = false)
+[01;32m[K               ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:249:15:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest.cpp:20:79:[m[K [01;36m[Knote: [m[K  candidate expects 3 arguments, 1 provided
+     ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter, 1000");
+[01;32m[K                                                                               ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:315:13:[m[K [01;36m[Knote: [m[Kcandidate: template<class M> ros::Publisher ros::NodeHandle::advertise(const string&, uint32_t, const SubscriberStatusCallback&, const SubscriberStatusCallback&, const VoidConstPtr&, bool)
+   Publisher advertise(const std::string& topic, uint32_t queue_size,
+[01;32m[K             ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:315:13:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest.cpp:20:79:[m[K [01;36m[Knote: [m[K  candidate expects 6 arguments, 1 provided
+     ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter, 1000");
+[01;32m[K                                                                               ^[m[K
+make[2]: *** [CMakeFiles/ftest.dir/src/ftest.cpp.o] Error 1
+make[1]: *** [CMakeFiles/ftest.dir/all] Error 2
+make: *** [all] Error 2

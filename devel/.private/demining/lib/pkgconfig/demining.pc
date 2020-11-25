@@ -1,0 +1,8 @@
+prefix=/home/ros/project/devel/.private/demining
+
+Name: demining
+Description: Description of demining
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

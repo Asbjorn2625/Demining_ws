@@ -47,3 +47,9 @@ int main(int argc, char** argv){
     r.sleep();
   }
 }
+
+//Find mere her: http://library.isr.ist.utl.pt/docs/roswiki/navigation(2f)Tutorials(2f)RobotSetup(2f)Sensors.html
+//For at se det i rviz, skal du: køre projektet, køre roscore, og åbne rviz. 
+//I Rviz skal du skrive "laser_frame" i stedet for map.
+//Add LaserScan og i dens topic skrives der "/scan".
+//Og til sidst ændres Size (m) til "0.2".

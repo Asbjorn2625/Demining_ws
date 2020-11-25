@@ -24,6 +24,25 @@ int main(int argc, char** argv){
       intensities[i] = 100 + count;
     }
     */
+    
+    for (unsigned int i = 0; i < 100; ++i)
+    {
+      ranges[i] = count;
+      intensities[i] = 100 + count;
+    }
+    
+/*
+float32 angle_min        # start angle of the scan [rad]
+float32 angle_max        # end angle of the scan [rad]
+float32 angle_increment  # angular distance between measurements [rad]
+float32 time_increment   # time between measurements [seconds]
+float32 scan_time        # time between scans [seconds]
+float32 range_min        # minimum range value [m]
+float32 range_max        # maximum range value [m]
+float32[] ranges         # range data [m] (Note: values < range_min or > range_max should be discarded)
+float32[] intensities    # intensity data [device-specific units]
+*/
+
 
     // ranges[10] = count;
 
@@ -33,9 +52,9 @@ int main(int argc, char** argv){
     sensor_msgs::LaserScan scan;
     scan.header.stamp = scan_time;
     scan.header.frame_id = "laser_frame";
-    scan.angle_min = -1.57;
-    scan.angle_max = 1.57;
-    scan.angle_increment = 3.14 / num_readings;
+    scan.angle_min = -1.57; //ser ikke ud til at gøre noget
+    scan.angle_max = 1.57; // 
+    scan.angle_increment = 3.14 * 2 / num_readings;
     scan.time_increment = (1 / laser_frequency) / (num_readings);
     scan.range_min = 0.0;
     scan.range_max = 10.0;
@@ -45,6 +64,7 @@ int main(int argc, char** argv){
     for(unsigned int i = 0; i < num_readings; ++i){
       scan.ranges[i] = ranges[i];
       scan.intensities[i] = intensities[i];
+      
     }
 
     scan_pub.publish(scan);

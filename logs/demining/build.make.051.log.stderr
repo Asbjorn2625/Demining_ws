@@ -1,0 +1,14 @@
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:64:19:[m[K [01;31m[Kerror: [m[K‘[01m[Ki[m[K’ was not declared in this scope
+       scan.ranges[i] = 5;
+[01;32m[K                   ^[m[K
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:69:22:[m[K [01;31m[Kerror: [m[K‘[01m[Kscan[m[K’ was not declared in this scope
+     scan_pub.publish(scan);
+[01;32m[K                      ^[m[K
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:[m[K At global scope:
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:73:1:[m[K [01;31m[Kerror: [m[Kexpected declaration before ‘[01m[K}[m[K’ token
+ }
+[01;32m[K ^[m[K
+make[2]: *** [CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o] Error 1
+make[1]: *** [CMakeFiles/fakeObj.dir/all] Error 2
+make: *** [all] Error 2

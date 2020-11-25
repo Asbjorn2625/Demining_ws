@@ -1,0 +1,11 @@
+[ 12%] Built target ftest2
+[ 25%] Built target fakeObj
+[35m[1mScanning dependencies of target ftestb[0m
+[ 37%] Built target ftest
+[ 43%] [32mBuilding CXX object CMakeFiles/ftestb.dir/src/ftestb.cpp.o[0m
+[ 56%] Built target hello_world
+[ 68%] Built target batteryMonitor
+[ 81%] Built target calibration
+[ 93%] Built target locate_d_area
+[100%] [32m[1mLinking CXX executable /home/ros/project/devel/.private/demining/lib/demining/ftestb[0m
+[100%] Built target ftestb

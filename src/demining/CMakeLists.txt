@@ -39,6 +39,7 @@ add_executable(calibration src/calibration.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 add_executable(batteryMonitor src/batteryMonitor.cpp)
 add_executable(ftest src/ftest.cpp)
+add_executable(ftestb src/ftestb.cpp)
 add_executable(ftest2 src/ftest2.cpp)
 add_executable(fakeObj src/fakeObj.cpp)
 
@@ -49,6 +50,7 @@ target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES})
 target_link_libraries(batteryMonitor ${catkin_LIBRARIES})
 target_link_libraries(ftest ${catkin_LIBRARIES})
+target_link_libraries(ftestb ${catkin_LIBRARIES})
 target_link_libraries(ftest2 ${catkin_LIBRARIES})
 target_link_libraries(fakeObj ${catkin_LIBRARIES})
 
@@ -57,7 +59,7 @@ target_link_libraries(fakeObj ${catkin_LIBRARIES})
 ############w#
 
 # Mark executables for installation
-install(TARGETS hello_world locate_d_area calibration ftest ftest2 fakeObj
+install(TARGETS hello_world locate_d_area calibration ftest ftestb ftest2 fakeObj
 
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 

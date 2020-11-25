@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>demining</name>
+  <version>0.0.0</version>
+  <description>The demining package</description>
+
+ 
+  <maintainer email="asbjorn2625@gmail.com"> Asbjørn Lauritsen </maintainer>
+
+  <license>MIT</license>
+
+  <author email="asbjorn2625@gmail.com"> Asbjørn Lauritsen </author>
+
+  <buildtool_depend> catkin </buildtool_depend>
+  <depend> roscpp </depend>
+  <depend> turtlesim </depend>
+  <depend> sensor_msgs </depend>
+  <depend> cv_bridge </depend>
+  <depend> std_msgs </depend>
+  <depend> image_transport </depend>
+
+
+</package>

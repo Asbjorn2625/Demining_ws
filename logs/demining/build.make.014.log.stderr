@@ -1,0 +1,133 @@
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:[m[K In function ‘[01m[Kint main(int, const char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:16:33:[m[K [01;31m[Kerror: [m[Kinvalid conversion from ‘[01m[Kconst char**[m[K’ to ‘[01m[Kint[m[K’ [-fpermissive]
+ ros::init(argv, argc, "listener");
+[01;32m[K                                 ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/node_handle.h:47:0[m[K,
+                 from [01m[K/opt/ros/kinetic/include/ros/ros.h:45[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/init.h:83:18:[m[K [01;36m[Knote: [m[K  initializing argument 1 of ‘[01m[Kvoid ros::init(int&, char**, const string&, uint32_t)[m[K’
+ ROSCPP_DECL void init(int &argc, char **argv, const std::string& name, uint32_t options = 0);
+[01;32m[K                  ^[m[K
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:16:33:[m[K [01;31m[Kerror: [m[Kcannot bind rvalue ‘[01m[K(int)((long int)argv)[m[K’ to ‘[01m[Kint&[m[K’
+ ros::init(argv, argc, "listener");
+[01;32m[K                                 ^[m[K
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Kros::NodeHandle::subscribe(const char [31])[m[K’
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:402:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(M), T*, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(T::*fp)(M), T* obj, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:402:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:413:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(M) const, T*, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(T::*fp)(M) const, T* obj, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:413:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:465:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(const boost::shared_ptr<const M>&), T*, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:465:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:475:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(const boost::shared_ptr<const M>&) const, T*, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:475:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:529:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(M), const boost::shared_ptr<U>&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(T::*fp)(M), 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:529:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:540:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(M) const, const boost::shared_ptr<U>&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(T::*fp)(M) const, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:540:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:594:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(const boost::shared_ptr<const M>&), const boost::shared_ptr<U>&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:594:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:605:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class T> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (T::*)(const boost::shared_ptr<const M>&) const, const boost::shared_ptr<U>&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, 
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:605:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:656:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (*)(M), const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(*fp)(M), const TransportHints& transport_hints = TransportHints())
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:656:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 4 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:704:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, void (*)(const boost::shared_ptr<const M>&), const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, void(*fp)(const boost::shared_ptr<M const>&), const TransportHints& transport_hints = TransportHints())
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:704:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 4 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:750:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, const boost::function<void(const boost::shared_ptr<const M>&)>&, const VoidConstPtr&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, const boost::function<void (const boost::shared_ptr<M const>&)>& callback,
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:750:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:799:14:[m[K [01;36m[Knote: [m[Kcandidate: template<class M, class C> ros::Subscriber ros::NodeHandle::subscribe(const string&, uint32_t, const boost::function<void(C)>&, const VoidConstPtr&, const ros::TransportHints&)
+   Subscriber subscribe(const std::string& topic, uint32_t queue_size, const boost::function<void (C)>& callback,
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:799:14:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ros/project/src/demining/src/ftest2.cpp:20:67:[m[K [01;36m[Knote: [m[K  candidate expects 5 arguments, 1 provided
+ ros::Subscriber sub = n.subscribe("chatter, 1000, chatterCallback");
+[01;32m[K                                                                   ^[m[K
+In file included from [01m[K/opt/ros/kinetic/include/ros/ros.h:45:0[m[K,
+                 from [01m[K/home/ros/project/src/demining/src/ftest2.cpp:2[m[K:
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:836:14:[m[K [01;36m[Knote: [m[Kcandidate: ros::Subscriber ros::NodeHandle::subscribe(ros::SubscribeOptions&)
+   Subscriber subscribe(SubscribeOptions& ops);
+[01;32m[K              ^[m[K
+[01m[K/opt/ros/kinetic/include/ros/node_handle.h:836:14:[m[K [01;36m[Knote: [m[K  no known conversion for argument 1 from ‘[01m[Kconst char [31][m[K’ to ‘[01m[Kros::SubscribeOptions&[m[K’
+make[2]: *** [CMakeFiles/ftest2.dir/src/ftest2.cpp.o] Error 1
+make[1]: *** [CMakeFiles/ftest2.dir/all] Error 2
+make: *** [all] Error 2

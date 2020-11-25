@@ -1,0 +1,10 @@
+[35m[1mScanning dependencies of target fakeObj[0m
+[  7%] [32mBuilding CXX object CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o[0m
+[ 21%] Built target ftest2
+[ 35%] Built target ftest
+[ 50%] Built target hello_world
+[ 64%] Built target batteryMonitor
+[ 78%] Built target calibration
+[ 92%] Built target locate_d_area
+[100%] [32m[1mLinking CXX executable /home/ros/project/devel/.private/demining/lib/demining/fakeObj[0m
+[100%] Built target fakeObj

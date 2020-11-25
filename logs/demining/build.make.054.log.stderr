@@ -1,0 +1,10 @@
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:67:39:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K)[m[K’ before ‘[01m[K;[m[K’ token
+       if(unsigned int i = num_readings;){
+[01;32m[K                                       ^[m[K
+[01m[K/home/ros/project/src/demining/src/fakeObj.cpp:67:40:[m[K [01;31m[Kerror: [m[Kexpected primary-expression before ‘[01m[K)[m[K’ token
+       if(unsigned int i = num_readings;){
+[01;32m[K                                        ^[m[K
+make[2]: *** [CMakeFiles/fakeObj.dir/src/fakeObj.cpp.o] Error 1
+make[1]: *** [CMakeFiles/fakeObj.dir/all] Error 2
+make: *** [all] Error 2
