@@ -42,10 +42,11 @@ bool fullyCharged = false;
 //int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V) 
 
 //Callback function saves x and y coordinates from subscriber
-void callbackStartPose(const geometry_msgs::Pose2D startPose)
+void callbackStartPose(const geometry_msgs::Pose2D startPose) 
 {
   homeGoal.target_pose.pose.position.x = startPose.x;
   homeGoal.target_pose.pose.position.y = startPose.y;
+  startPoseSub.shutdown();//Subscriber only needs to update home once (tested this works)
 }
 
 //Callback function saves x and y coordinates from subscriber
@@ -59,14 +60,14 @@ void callbackCurrentPose(const nav_msgs::Odometry odomPose)
 double currentPoseSaver()
 {
   ros::spinOnce();
-  savedPose.x = odomPose.pose.pose.position.x; //
-  savedPose.y = odomPose.pose.pose.position.y; //
+  savedPose.x = currentPose.x;
+  savedPose.y = currentPose.y;
 }
 
 //Function for sending the robot back to the dock
 void headHomeToCharge()
 {
-  //Pause current task
+  //Stop current task
 
   currentPoseSaver(); //Save current location before returning
   std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
@@ -76,7 +77,6 @@ void headHomeToCharge()
   client1.waitForServer();            //Wait for feedback from the Action server
   
   //move_base_msgs::MoveBaseGoal homeGoal;
-
   client1.sendGoal(homeGoal);         //Sends new goal as the home position
   client1.waitForResult();            //Waits fo the robot to reach this destination
 
@@ -87,7 +87,6 @@ void headHomeToCharge()
     client2.waitForServer();                          //Wait for feedback from the Action server
     
     //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
-
     client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
     client2.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
 
@@ -109,9 +108,7 @@ void headHomeToCharge()
 void resumeDemining()
 {
   //Drive out of dock
-
   //Find its way back towards saved location
-
   //Resume demining task
 }
 
@@ -203,13 +200,26 @@ int main(int argc, char *argv[])
   //Test without low battery
   //ros::spinOnce();
   //headHomeToCharge();
-
+  
   /*
   while(ros::ok())
   {
+    currentPoseSaver(); //Save current location before returning
+    std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
+    std::cin.get();
+    //currentPoseSaver(); //Save current location before returning
+    //std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
+    
+    //std::cout << "Home at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
+
+
     ros::spinOnce();//Updates all subscribed and published information
   }
   */
+
+  currentPoseSaver(); //Save current location before returning
+  std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
+  std::cin.get();
 
   ros::spin();
   return 0;
