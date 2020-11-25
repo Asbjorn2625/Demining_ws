@@ -4,10 +4,16 @@
 #include <kobuki_msgs/PowerSystemEvent.h> //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>     //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
 
-#include <actionlib/client/simple_action_client.h>//actionlib for 
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/simple_client_goal_state.h>
+
 #include <kobuki_msgs/AutoDockingAction.h>//Used for the autodocking feature
 #include <kobuki_msgs/AutoDockingGoal.h>  //Used for the autodocking feature
+
+
 typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient; //dockingClient 
+typedef actionlib::SimpleActionClient <move_base_msgs::MoveBaseAction> moveBaseClient;
 
 // Current laptop battery charge topic /laptop_charge (/percentage)
 // Current kobuki battery charge topic /mobile_base/sensors/core/battery
@@ -26,16 +32,14 @@ ros::Subscriber kobukiBatStateSub;
 ros::Subscriber kobukiBatlevelSub;
 ros::Subscriber laptopBatlevelSub;
 
-//Function for sending the robot back to the start
+//Function for sending the robot back to the dock
 void headHomeToCharge()
 {
-  //Save current location (and path?)
-  //Next
+  //Save current location
 
   //Drive towards starting position (following a safe route)
 
   //If manual control is taken pause this task and resume afterwards
-
 
   dockingClient client("dock_drive_action", true);//Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
   client.waitForServer();                         //Wait for feedback from the Action server
@@ -52,6 +56,16 @@ void headHomeToCharge()
   {
     std::cout << "Error did not reach dock. Current State: " << client.getState().toString().c_str() << std::endl;
   }
+}
+
+//Function to return to previous location so the robot can resume work
+void resumeDemining()
+{
+  //Drive out of dock
+
+  //Find its way back towards saved location
+
+  //Resume demining task
 }
 
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
@@ -77,6 +91,8 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState)
   case 3: //Base has reached maximum charge
     std::cout << "Base fully charged! Ready to go" << std::endl;
     fullyCharged = true;
+
+    resumeDemining();
     break;
 
   case 4: //Base is low on battery (15%)
@@ -99,8 +115,8 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 {
   std::cout << "Laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
 
-  if (laptopBatLevel.percentage <= 15)//When laptop reaches 15% remaining power it the robot shall return home
   //Testet og virker
+  if (laptopBatLevel.percentage <= 15)//When laptop reaches 15% remaining power it the robot shall return home
   {
     std::cout << "Laptop is low on battery. Pausing operation and heading to dock" << std::endl;
 
