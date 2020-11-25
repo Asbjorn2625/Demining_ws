@@ -1,85 +1,113 @@
 #include <ros/ros.h>
+
 #include <iostream>                       //iostream present for testing and error messages
-#include <std_msgs/Float64MultiArray.h>   //msgs for start pos subscriber
-#include <geometry_msgs/Pose2D.h>
+
+#include <geometry_msgs/Pose2D.h>         //msgs for start pos subscriber
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/simple_client_goal_state.h>
+#include <nav_msgs/Odometry.h>
 
 #include <kobuki_msgs/PowerSystemEvent.h> //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>     //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
-
-#include <move_base_msgs/MoveBaseAction.h>
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/simple_client_goal_state.h> //Needed?
-#include <nav_msgs/Odometry.h>
-
 #include <kobuki_msgs/AutoDockingAction.h>//Used for the autodocking feature
 #include <kobuki_msgs/AutoDockingGoal.h>  //Used for the autodocking feature
 
-
-typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient; //dockingClient 
+//Actionlib
+typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient;
 typedef actionlib::SimpleActionClient <move_base_msgs::MoveBaseAction> moveBaseClient;
-
-//Initialisation of global variables
-//int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V) 
-bool fullyCharged = false;
-double currentPose[2];//Array for coordinates of the position it leaves when moving home to charge
-
-//Declaration of callback constants messagetypes
-kobuki_msgs::PowerSystemEvent kobBatState;
-//sensor_msgs::BatteryState kobBatLevel;
-sensor_msgs::BatteryState laptopBatLevel;
-move_base_msgs::MoveBaseGoal homeGoal;
 kobuki_msgs::AutoDockingGoal dockingGoal;
-nav_msgs::Odometry odomPose;
+move_base_msgs::MoveBaseGoal homeGoal;
 
 //Declaration of subscribers
 ros::Subscriber kobukiBatStateSub;
 //ros::Subscriber kobukiBatlevelSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
+ros::Subscriber currentPoseSub;
 
-double currentPoseSaver(){
-  ros::spinOnce();
-  currentPose[0] = odomPose.pose.pose.position.x; //
-  currentPose[1] = odomPose.pose.pose.position.y; //
-  //currentPose[2] = odomPose.pose.pose.orientation;//Radianer
+//Declaration of callback messagetypes
+kobuki_msgs::PowerSystemEvent kobBatState;
+//sensor_msgs::BatteryState kobBatLevel;
+sensor_msgs::BatteryState laptopBatLevel;
+geometry_msgs::Pose2D startPose;
+nav_msgs::Odometry odomPose;
+
+//Declaration of global variables
+geometry_msgs::Pose2D currentPose;//Constantly updated position of robot
+geometry_msgs::Pose2D savedPose;  //Saved position before heading home
+
+//Initialisation of global variables
+bool fullyCharged = false;
+//int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V) 
+
+//Callback function saves x and y coordinates from subscriber
+void callbackStartPose(const geometry_msgs::Pose2D startPose)
+{
+  homeGoal.target_pose.pose.position.x = startPose.x;
+  homeGoal.target_pose.pose.position.y = startPose.y;
 }
 
-void callbackStartPose(const geometry_msgs::Pose2D startXY){
-  homeGoal.target_pose.pose.position.x = startXY.x;
-  homeGoal.target_pose.pose.position.y = startXY.y;
+//Callback function saves x and y coordinates from subscriber
+void callbackCurrentPose(const nav_msgs::Odometry odomPose)
+{
+  currentPose.x = odomPose.pose.pose.position.x;
+  currentPose.y = odomPose.pose.pose.position.y;
+}
+
+//Function saves current position
+double currentPoseSaver()
+{
+  ros::spinOnce();
+  savedPose.x = odomPose.pose.pose.position.x; //
+  savedPose.y = odomPose.pose.pose.position.y; //
 }
 
 //Function for sending the robot back to the dock
-void headHomeToCharge(){
+void headHomeToCharge()
+{
   //Pause current task
 
-  currentPoseSaver(); //Save current location
-  std::cout << "Currently at x= " << currentPose[0] << ", y= " << currentPose[1] << std::endl;
+  currentPoseSaver(); //Save current location before returning
+  std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
 
   //Drive towards starting position (following a safe route)
   moveBaseClient client1("move_base");//Starts client as move_base
   client1.waitForServer();            //Wait for feedback from the Action server
+  
   //move_base_msgs::MoveBaseGoal homeGoal;
+
   client1.sendGoal(homeGoal);         //Sends new goal as the home position
   client1.waitForResult();            //Waits fo the robot to reach this destination
 
-  //Docking procedure
-  dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
-  client2.waitForServer();                          //Wait for feedback from the Action server
-  //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
-  client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
-  client2.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
+  if(client1.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
+    //Docking procedure
+    dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
+    client2.waitForServer();                          //Wait for feedback from the Action server
+    
+    //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
 
-  if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-    std::cout << "Turtlebot reached dock, and is charging" << std::endl;
+    client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
+    client2.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
+
+    if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+    {
+      std::cout << "Turtlebot reached dock, and is charging" << std::endl;
+    }
+    else
+    {
+      std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
+    }
   }
   else{
-    std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
+    std::cout << "Error did not reach home. Current State: " << client1.getState().toString().c_str() << std::endl;
   }
 }
 
 //Function to return to previous location so the robot can resume work
-void resumeDemining(){//Unfinished
+void resumeDemining()
+{
   //Drive out of dock
 
   //Find its way back towards saved location
@@ -87,10 +115,13 @@ void resumeDemining(){//Unfinished
   //Resume demining task
 }
 
-void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState){
-  switch(kobBatState.event){
+void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState)//removed & before kobBatState
+{
+  switch(kobBatState.event)
+  {
   case 0: //Unplugged from charger
-    if (!fullyCharged){
+    if (!fullyCharged)
+    {
       std::cout << "Base not fully charged, operation time will be reduced" << std::endl;
     }
     fullyCharged = false;
@@ -108,7 +139,7 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent &kobBatState){
     std::cout << "Base fully charged! Ready to go" << std::endl;
     fullyCharged = true;
 
-    resumeDemining();
+    resumeDemining(); //Return to demining task
     break;
 
   case 4: //Base is low on battery (15%)
@@ -132,12 +163,12 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
   std::cout << "Laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
 
   //Testet og virker
-  if (laptopBatLevel.percentage <= 15){//When laptop reaches 15% remaining power it the robot shall return home
+  if (laptopBatLevel.percentage <= 15 && laptopBatLevel.power_supply_status != 1)//When laptop reaches 15% remaining power it the robot shall return home
+  {
     std::cout << "Laptop is low on battery. Pausing operation and heading to dock" << std::endl;
 
     headHomeToCharge(); //Send robot home to recharge laptop
   }
-  //Is charging?
 }
 
 /* attempt at better solution for kobuki base battery
@@ -149,29 +180,37 @@ void callbackKobukiBat(const sensor_msgs::BatteryState kobBatLevel)
 }
 */
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
   ros::init(argc, argv, "batteryMonitor"); //initialises node as batteryMonitor
   ros::NodeHandle n;
+
+  //Subscribes to the start position detected by another node
+  startPoseSub = n.subscribe("/start_position", 1, callbackStartPose);
+
+  //Subscribes to the current position of the robot
+  currentPoseSub = n.subscribe ("/odom", 1, callbackCurrentPose);
 
   //Subscribes to the laptop battery
   laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
   
   //More precise battery function with percentage option
   //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core", 10, callbackKobukiBat);
+
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
-  //Subscribes to the start position detected by another node (will only be updated once)
-  startPoseSub = n.subscribe("/start_position", 1, callbackStartPose);
-
-
   //Test without low battery
-  ros::spinOnce();
-  headHomeToCharge();
+  //ros::spinOnce();
+  //headHomeToCharge();
 
-  while(ros::ok()){
+  /*
+  while(ros::ok())
+  {
     ros::spinOnce();//Updates all subscribed and published information
   }
-  
+  */
+
+  ros::spin();
   return 0;
 }
