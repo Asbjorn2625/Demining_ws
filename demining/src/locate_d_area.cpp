@@ -5,6 +5,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
+#include <std_msgs/Float64MultiArray.h>
 
 class MovingToPosition{
 private:
@@ -13,8 +14,10 @@ ros::NodeHandle n;
 tf::TransformListener listener;
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 1);
+ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 10);
 public:
+std::string userInput = "";
+//ros::Publisher deminingArea_pub = n.advertise<std_msgs::Float64MultiArray array_msg>("demining_area_location", 10);
 
 double getPosition(double mapPose[]){
 ros::spinOnce();
@@ -29,7 +32,7 @@ listener.getLatestCommonTime(pBase.header.frame_id, "map", current_transform, NU
 ros::Duration(0.2).sleep();
 pBase.header.stamp = current_transform;
 listener.transformPose("map", pBase, pMap);
-//printf("robot pose: (%.2f, %.2f)\n", pMap.pose.position.x, pMap.pose.position.y);
+
 mapPose[0] = pMap.pose.position.x;
 mapPose[1] = pMap.pose.position.y;
 }
@@ -43,9 +46,6 @@ void moveTo(double posX, double posY, const char* oriantation){
   }
 move_base_msgs::MoveBaseGoal goal;
 
-
-
-  //we'll send a goal to the robot to move 1 meter forward
   goal.target_pose.header.frame_id = "base_link";
   goal.target_pose.header.stamp = ros::Time::now();
 
@@ -73,9 +73,14 @@ else if(oriantation == "Backwards"){
 
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("Sucess, the base moved to the goal");
-  else
-    ROS_INFO("The base failed to move to the goal");
-
+  else{
+    ROS_INFO("The base failed to move to the goal. \nDo you wish to continue? y/n \n");
+    std::getline(std::cin, userInput);
+    if(userInput == "n"){
+      std::exit(0);
+    }else if(userInput == "y"){
+    }
+  }
 }
 
 void moveToMap(double posX, double posY){
@@ -87,9 +92,6 @@ void moveToMap(double posX, double posY){
   }
 move_base_msgs::MoveBaseGoal goal;
 
-
-
-  //we'll send a goal to the robot to move 1 meter forward
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
 
@@ -103,9 +105,13 @@ move_base_msgs::MoveBaseGoal goal;
 
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("Sucess, the base moved to the goal");
-  else
-    ROS_INFO("The base failed to move to the goal");
-
+  else{
+    ROS_INFO("The base failed to move to the goal. \nDo you wish to continue? y/n \n");
+    std::getline(std::cin, userInput);
+    if(userInput == "n"){
+      std::exit(0);
+    }
+  }
 }
 
 
@@ -236,14 +242,14 @@ for (int i=1;i<pointsOnMap/2; i=i+2){
   }else{
     std::cout << "failed angle \n";
   }
-  printf("location 1 = (%f,%f) location 2 = (%f,%f)\n", xPoint[i],yPoint[i],xPoint[i+1],yPoint[i+1]);
+  printf("location (%d) = (%f,%f) location (%d+1) = (%f,%f)\n", i,xPoint[i],yPoint[i],i,xPoint[i+1],yPoint[i+1]);
+  //start.deminingArea_pub.publish(xPoint);
+  //start.deminingArea_pub.publish(yPoint);
 }
 for (int i =0;i<pointsOnMap;i++){
   loop_rate.sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
 }
-		ros::spinOnce();loop_rate.sleep();ros::spinOnce();
-		//printf("robot final pose: (%.2f, %.2f, %.2f)\n", turtlebot_odom_pose.pose.pose.position.x, turtlebot_odom_pose.pose.pose.position.y,radian2degree(tf::getYaw(turtlebot_odom_pose.pose.pose.orientation)));
 		return 0;
 	}
 
