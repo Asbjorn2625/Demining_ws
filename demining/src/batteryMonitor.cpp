@@ -1,5 +1,4 @@
 #include <ros/ros.h>
-
 #include <iostream> //iostream present for testing and error messages
 
 #include <geometry_msgs/Pose2D.h> //msgs for start pos subscriber
@@ -39,7 +38,6 @@ public:
     ros::Duration(0.2).sleep();
     pBase.header.stamp = current_transform;
     listener.transformPose("map", pBase, pMap);
-    //printf("robot pose: (%.2f, %.2f)\n", pMap.pose.position.x, pMap.pose.position.y);
     mapPose[0] = pMap.pose.position.x;
     mapPose[1] = pMap.pose.position.y;
   }
@@ -152,14 +150,12 @@ move_base_msgs::MoveBaseGoal homeGoal;
 
 //Declaration of subscribers
 ros::Subscriber kobukiBatStateSub;
-//ros::Subscriber kobukiBatlevelSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
 ros::Subscriber currentPoseSub;
 
 //Declaration of callback messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
-//sensor_msgs::BatteryState kobBatLevel;
 sensor_msgs::BatteryState laptopBatLevel;
 geometry_msgs::Pose2D startPose;
 nav_msgs::Odometry odomPose;
@@ -170,7 +166,6 @@ geometry_msgs::Pose2D savedPose;   //Saved position before heading home
 
 //Initialisation of global variables
 bool fullyCharged = false;
-//int const kobuki_max_charge_voltage = 163;//Voltage from base battery at full charge (measured in 0.1V)
 
 //Callback function saves x and y coordinates from subscriber
 void callbackStartPose(const geometry_msgs::Pose2D startPose)
@@ -205,23 +200,7 @@ void headHomeToCharge()
 
   MovingToPosition moveClass;
   moveClass.moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
-  /*
-  //Drive towards starting position (following a safe route)
-  moveBaseClient client1("move_base");//Starts client as move_base
-  client1.waitForServer();            //Wait for feedback from the Action server
   
-  //move_base_msgs::MoveBaseGoal homeGoal;
-  client1.sendGoal(homeGoal);         //Sends new goal as the home position
-  client1.waitForResult();            //Waits fo the robot to reach this destination
-
-  if(client1.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-  {
-    
-  }
-  else{
-    std::cout << "Error did not reach home. Current State: " << client1.getState().toString().c_str() << std::endl;
-  }
-  */
   //Docking procedure
   dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
   client2.waitForServer();                          //Wait for feedback from the Action server
@@ -304,15 +283,6 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
   }
 }
 
-/* attempt at better solution for kobuki base battery
-void callbackKobukiBat(const sensor_msgs::BatteryState kobBatLevel)
-{
-  std::cout << "kobuki battery is currently at " << kobBatLevel.percentage << "%" << std::endl;
-  
-  //std::cout << "laptop battery is currently at " << laptopBatLevel << "%" << std::endl;
-}
-*/
-
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "batteryMonitor"); //initialises node as batteryMonitor
@@ -327,15 +297,8 @@ int main(int argc, char *argv[])
   //Subscribes to the laptop battery
   laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
 
-  //More precise battery function with percentage option
-  //kobukiBatlevelSub = n.subscribe("/mobile_base/sensors/core", 10, callbackKobukiBat);
-
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
-
-  //Test without low battery
-  //ros::spinOnce();
-  //headHomeToCharge();
 
   int lastInput;
   while (ros::ok())
@@ -358,7 +321,5 @@ int main(int argc, char *argv[])
       std::cout << "Other input recieved" << std::endl;
     }
   }
-
-  //ros::spin();
   return 0;
 }
