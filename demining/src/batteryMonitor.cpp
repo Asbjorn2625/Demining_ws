@@ -21,12 +21,10 @@
 
 class MovingToPosition{
   private:
-  ros::NodeHandle n;
 
   tf::TransformListener listener;
 
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 1);
   public:
 
   double getPosition(double mapPose[]){
@@ -45,50 +43,6 @@ class MovingToPosition{
   //printf("robot pose: (%.2f, %.2f)\n", pMap.pose.position.x, pMap.pose.position.y);
   mapPose[0] = pMap.pose.position.x;
   mapPose[1] = pMap.pose.position.y;
-  }
-
-  void moveTo(double posX, double posY, const char* oriantation){
-  MoveBaseClient ac("move_base", true);
-
-    //wait for the action server to come up
-    while(!ac.waitForServer(ros::Duration(5.0))){
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-  move_base_msgs::MoveBaseGoal goal;
-
-
-
-    //we'll send a goal to the robot to move 1 meter forward
-    goal.target_pose.header.frame_id = "base_link";
-    goal.target_pose.header.stamp = ros::Time::now();
-
-    goal.target_pose.pose.position.x = posX;
-    goal.target_pose.pose.position.y = posY;
-
-  if(oriantation == "Right"){
-    goal.target_pose.pose.orientation.w = -sqrt(0.5);
-    goal.target_pose.pose.orientation.z = sqrt(0.5);
-  }else if(oriantation == "Left"){
-    goal.target_pose.pose.orientation.w = sqrt(0.5);
-    goal.target_pose.pose.orientation.z = -sqrt(0.5);
-  }
-  else if(oriantation == "Backwards"){
-    goal.target_pose.pose.orientation.w = 0;
-    goal.target_pose.pose.orientation.z = 1;	
-  }else{
-    goal.target_pose.pose.orientation.w = 1;
-    goal.target_pose.pose.orientation.z = 0;	
-  }
-    ROS_INFO("Sending goal");
-    ac.sendGoal(goal);
-
-    ac.waitForResult();
-
-    if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      ROS_INFO("Sucess, the base moved to the goal");
-    else
-      ROS_INFO("The base failed to move to the goal");
-
   }
 
   void moveToMap(double posX, double posY, const char* oriantation){
@@ -135,49 +89,10 @@ class MovingToPosition{
       ROS_INFO("The base failed to move to the goal");
 
   }
-
-
-  void setPointMap(double posX, double posY, double size, double height, uint32_t shape){
-  //visualization_msgs::Marker::CYLINDER
-  visualization_msgs::Marker marker_array;
-    marker_array.header.frame_id = "/map";
-    marker_array.header.stamp = ros::Time::now();
-    marker_array.ns = "map_pointers";
-    marker_array.id = 0;
-    marker_array.type = shape;
-    marker_array.action = visualization_msgs::Marker::ADD;
-    marker_array.pose.position.x = posX;
-    marker_array.pose.position.y = posY;
-    marker_array.pose.position.z = 0.0;
-    marker_array.pose.orientation.x = 0.0;
-    marker_array.pose.orientation.y = 0.0;
-    marker_array.pose.orientation.z = 0.0;
-    marker_array.pose.orientation.w = 1.0;
-
-    marker_array.scale.x = size;
-    marker_array.scale.y = size;
-    marker_array.scale.z = height;
-
-    marker_array.color.r = 0.0f;
-    marker_array.color.g = 1.0f;
-    marker_array.color.b = 0.0f;
-    marker_array.color.a = 1.0;
-
-  marker_array.lifetime = ros::Duration();
-
-
-    while (marker_pub.getNumSubscribers() < 1)
-      {
-        if (!ros::ok())
-        {
-        break;
-        }
-        ROS_WARN_ONCE("Please create a subscriber to the marker");
-        sleep(1);
-      }
-      marker_pub.publish(marker_array);
-  }
 };
+
+//
+
 
 //Actionlib
 typedef actionlib::SimpleActionClient <kobuki_msgs::AutoDockingAction> dockingClient;
@@ -238,7 +153,8 @@ void headHomeToCharge()
   currentPoseSaver(); //Save current location before returning
   std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
 
-  MovingToPosition::moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y);
+  MovingToPosition moveInMap;
+  moveInMap.moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
   /*
   //Drive towards starting position (following a safe route)
   moveBaseClient client1("move_base");//Starts client as move_base
