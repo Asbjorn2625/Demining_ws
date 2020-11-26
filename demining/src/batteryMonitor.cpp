@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+
 #include <iostream> //iostream present for testing and error messages
 
 #include <geometry_msgs/Pose2D.h> //msgs for start pos subscriber
@@ -6,7 +7,6 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/simple_client_goal_state.h>
 #include <nav_msgs/Odometry.h>
-#include <std_msgs/Bool.h>
 
 #include <kobuki_msgs/PowerSystemEvent.h>  //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>      //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
@@ -156,7 +156,6 @@ ros::Subscriber kobukiBatStateSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
 ros::Subscriber currentPoseSub;
-ros::Publisher pausePub;
 
 //Declaration of callback messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
@@ -206,7 +205,23 @@ void headHomeToCharge()
 
   MovingToPosition moveClass;
   moveClass.moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
+  /*
+  //Drive towards starting position (following a safe route)
+  moveBaseClient client1("move_base");//Starts client as move_base
+  client1.waitForServer();            //Wait for feedback from the Action server
   
+  //move_base_msgs::MoveBaseGoal homeGoal;
+  client1.sendGoal(homeGoal);         //Sends new goal as the home position
+  client1.waitForResult();            //Waits fo the robot to reach this destination
+
+  if(client1.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
+    
+  }
+  else{
+    std::cout << "Error did not reach home. Current State: " << client1.getState().toString().c_str() << std::endl;
+  }
+  */
   //Docking procedure
   dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
   client2.waitForServer();                          //Wait for feedback from the Action server
@@ -318,14 +333,15 @@ int main(int argc, char *argv[])
   //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
-  pausePub = n.advertise <std_msgs::Bool> ("/pause_demining", 1, true);
+  //Test without low battery
+  //ros::spinOnce();
+  //headHomeToCharge();
 
   int lastInput;
-  std_msgs::Bool pauseVar;
   while (ros::ok())
   {
     ros::spinOnce(); //Updates all subscribed and published information
-    std::cout << "input a number from 1 to 5: " << std::endl;
+    std::cout << "input a number from 1 to 3: " << std::endl;
     std::cin >> lastInput;
     switch (lastInput)
     {
@@ -338,19 +354,11 @@ int main(int argc, char *argv[])
     case 3:
       std::cout << "Ending program" << std::endl;
       return 0;
-    case 4:
-      pauseVar.data = true;
-      pausePub.publish(pauseVar);
-      break;
-    case 5:
-      pauseVar.data = false;
-      pausePub.publish(pauseVar);
-      break;
     default:
       std::cout << "Other input recieved" << std::endl;
     }
   }
 
-  ros::spin();
+  //ros::spin();
   return 0;
 }
