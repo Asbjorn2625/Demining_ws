@@ -8,7 +8,7 @@
 int rotates = 0;
 int current_rotate =0;
 
-void BumberROBSubCallBack(const kobuki_msgs::BumperEvent bumperMessage){
+void BumberROBSubCallBack(const kobuki_msgs::BumperEvent bumperMessage){      //Input from bumpersensor
     
     if(bumperMessage.bumper == 0){
         std::cout << "!!!!!BANG!!!!! (Left)\n";
@@ -27,7 +27,7 @@ void BumberROBSubCallBack(const kobuki_msgs::BumperEvent bumperMessage){
     }   
 }
 
-void FindMinesSubCallBack(const std_msgs::Int32 MineMessage){
+void FindMinesSubCallBack(const std_msgs::Int32 MineMessage){               //Input from Minecamera
 std::cout << "Recived : " << MineMessage.data << "\n";
 rotates++;
 }
@@ -86,7 +86,7 @@ ros::NodeHandle n;
 //Init subscriber
 ros::Subscriber BumberROBSub = n.subscribe("/mobile_base/events/bumper", 1000, BumberROBSubCallBack);
 ros::Subscriber FindingminesNode = n.subscribe("mineCounter",1000, FindMinesSubCallBack);
-ros::Rate rate(5); // 5Hz
+ros::Rate rate(10); // 10Hz
     
   //init direction that turtlebot should go
   geometry_msgs::Twist base_cmd;
@@ -111,7 +111,7 @@ ros::Rate rate(5); // 5Hz
   //and let's go forward by setting X to a positive value
   base_cmd.linear.x = 0.25;
   base_cmd.angular.z = 0.0;
-  ROS_INFO_STREAM("And Crashing ... ctrl + c to stop me :)");
+  //ROS_INFO_STREAM("And Crashing ... ctrl + c to stop me :)");
 
   //base_cmd_turn_left will be used to turn turtlebot 90 degrees
   base_cmd_turn_back.linear.x = -0.25; //m/s
@@ -130,12 +130,12 @@ ros::Rate rate(5); // 5Hz
 
 
 while (ros::ok()){
-
+std::cout <<"ok!\n";
 
     if(rotates!=current_rotate && rotates>0){
       std::cout << "changing rotating\n";
       current_rotate=rotates;
-      for(int n=10; n>0; n--) {
+      for(int n=10; n>0; n--) {                     //Backing up
         cmd_vel_pub_.publish(base_cmd_turn_back);
         rate.sleep();
         ros::spinOnce();
@@ -145,17 +145,17 @@ while (ros::ok()){
 
     if(rotates>0){
       std::cout << "changing rotating\n";
-    for(int n=10; n>0; n--) {
+    for(int n=10; n>0; n--) {                     //Rotating left
       cmd_vel_pub_.publish(base_cmd_turn_left);
       rate.sleep();
       ros::spinOnce();
     }
-    for(int n=10; n>0; n--) {
+    for(int n=10; n>0; n--) {                     //Forward
       cmd_vel_pub_.publish(base_cmd);
       rate.sleep();
       ros::spinOnce();
     }
-    for(int n=10; n>0; n--) {
+    for(int n=10; n>0; n--) {                     //Rotating right
       cmd_vel_pub_.publish(base_cmd_turn_right);
       rate.sleep();
       ros::spinOnce();
@@ -163,13 +163,13 @@ while (ros::ok()){
     rotates=0;
     }
 ros::spinOnce();
-base_cmd.linear.x = 0;
+base_cmd.linear.x = 0;                            //Stopping
   base_cmd.linear.y = 0;
   base_cmd.angular.z = 0;
   cmd_vel_pub_.publish(base_cmd);
 
 }
-base_cmd.linear.x = 0;
+base_cmd.linear.x = 0;                            //Stopping
   base_cmd.linear.y = 0;
   base_cmd.angular.z = 0;
   cmd_vel_pub_.publish(base_cmd);
