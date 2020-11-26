@@ -41,7 +41,7 @@ public:
     mapPose[0] = pMap.pose.position.x;
     mapPose[1] = pMap.pose.position.y;
   }
-
+  /*
   void moveTo(double posX, double posY, const char *oriantation)
   {
     MoveBaseClient ac("move_base", true);
@@ -90,7 +90,7 @@ public:
     else
       ROS_INFO("The base failed to move to the goal");
   }
-
+  */
   void moveToMap(double posX, double posY, const char *oriantation)
   {
     MoveBaseClient ac("move_base", true);
@@ -152,16 +152,16 @@ move_base_msgs::MoveBaseGoal homeGoal;
 ros::Subscriber kobukiBatStateSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
-ros::Subscriber currentPoseSub;
+//ros::Subscriber currentPoseSub;
 
 //Declaration of callback messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
 sensor_msgs::BatteryState laptopBatLevel;
 geometry_msgs::Pose2D startPose;
-nav_msgs::Odometry odomPose;
+//nav_msgs::Odometry odomPose;
 
 //Declaration of global variables
-geometry_msgs::Pose2D currentPose; //Constantly updated position of robot
+//geometry_msgs::Pose2D currentPose; //Constantly updated position of robot
 geometry_msgs::Pose2D savedPose;   //Saved position before heading home
 
 //Initialisation of global variables
@@ -176,27 +176,27 @@ void callbackStartPose(const geometry_msgs::Pose2D startPose)
 }
 
 //Callback function saves x and y coordinates from subscriber
-void callbackCurrentPose(const nav_msgs::Odometry odomPose)
-{
-  currentPose.x = odomPose.pose.pose.position.x;
-  currentPose.y = odomPose.pose.pose.position.y;
-}
+//void callbackCurrentPose(const nav_msgs::Odometry odomPose)
+//{
+//  currentPose.x = odomPose.pose.pose.position.x;
+//  currentPose.y = odomPose.pose.pose.position.y;
+//}
 
 //Function saves current position
-double currentPoseSaver()
-{
-  ros::spinOnce();
-  savedPose.x = currentPose.x;
-  savedPose.y = currentPose.y;
-}
+//double currentPoseSaver()
+//{
+//  ros::spinOnce();
+//  savedPose.x = currentPose.x;
+//  savedPose.y = currentPose.y;
+//}
 
 //Function for sending the robot back to the dock
 void headHomeToCharge()
 {
   //Stop current task
 
-  currentPoseSaver(); //Save current location before returning
-  std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
+  //currentPoseSaver(); //Save current location before returning
+  //std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
 
   MovingToPosition moveClass;
   moveClass.moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
@@ -205,7 +205,6 @@ void headHomeToCharge()
   dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
   client2.waitForServer();                          //Wait for feedback from the Action server
 
-  //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
   client2.sendGoal(dockingGoal); //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
   client2.waitForResult();       //ros::Duration(5.0) for maximum wait time?
 
@@ -220,12 +219,12 @@ void headHomeToCharge()
 }
 
 //Function to return to previous location so the robot can resume work
-void resumeDemining()
-{
+//void resumeDemining()
+//{
   //Drive out of dock
   //Find its way back towards saved location
   //Resume demining task
-}
+//}
 
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //removed & before kobBatState
 {
@@ -251,7 +250,7 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //r
     std::cout << "Base fully charged! Ready to go" << std::endl;
     fullyCharged = true;
 
-    resumeDemining(); //Return to demining task
+    //resumeDemining(); //Return to demining task
     break;
 
   case 4: //Base is low on battery (15%)
@@ -292,7 +291,7 @@ int main(int argc, char *argv[])
   startPoseSub = n.subscribe("/start_position", 1, callbackStartPose);
 
   //Subscribes to the current position of the robot
-  currentPoseSub = n.subscribe("/odom", 1, callbackCurrentPose);
+  //currentPoseSub = n.subscribe("/odom", 1, callbackCurrentPose);
 
   //Subscribes to the laptop battery
   laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
