@@ -46,6 +46,7 @@ add_executable(MineSweeper src/MineSweeper.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 add_executable(Input_User src/Input_User.cpp)
 add_executable(BumperTest src/BumperTest.cpp)
+add_executable(FMineTest src/FMineTest.cpp)
 # Link to Catkin libraries
 target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
@@ -53,6 +54,7 @@ target_link_libraries(MineSweeper ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(Input_User ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(BumperTest ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(FMineTest ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 
 
@@ -61,7 +63,7 @@ target_link_libraries(BumperTest ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 ############w#
 
 # Mark executables for installation
-install(TARGETS hello_world locate_d_area calibration MineSweeper Input_User BumperTest
+install(TARGETS hello_world locate_d_area calibration MineSweeper Input_User BumperTest FMineTest
 
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
