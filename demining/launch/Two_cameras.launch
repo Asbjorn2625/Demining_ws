@@ -21,7 +21,7 @@
       args="-0.1325 -0.1975 0.0 -1.570796327 0.0 0.0 /base_link /camera2_link 100" />
    
    <!-- Choose visualization -->
-   <arg name="rviz"       default="false" />
+   <arg name="rviz"       default="true" />
    <arg name="rtabmapviz" default="false" /> 
    
    <!-- ODOMETRY MAIN ARGUMENTS: 
