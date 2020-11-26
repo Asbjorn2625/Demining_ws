@@ -42,9 +42,9 @@ std::ofstream myfile;
 int FoundMines = 0;     //Number of found mines
 
 //Other bots locations
-int BotLocation=0;
-float BotX=0;
-float BotY=0;
+int BotLocation=1;
+float BotX=1;
+float BotY=1;
 
 
 
@@ -56,12 +56,101 @@ float distance(){      // distance to start position
 
 
 void GoTo(float newX, float newY){ //Go to given location
-    if(newX != currentPosX || newY != currentPosY){
+    while(newX != currentPosX || newY != currentPosY){
+        std::cout << "Current position is : " << currentPosX << "," << currentPosY << "\n";
+        if(newX<currentPosX){
+            if((currentPosX-newX)>=1){
+                currentPosX=currentPosX-1;
+            }
+            else if((currentPosX-newX)>=0.1){
+                currentPosX=currentPosX-0.1;
+            }
+            else if((currentPosX-newX)>=0.01){
+                currentPosX=currentPosX-0.01;
+            }
 
+        }
+        else if(newX>currentPosX){
+            if((newX-currentPosX)>=1){
+                currentPosX=currentPosX+1;
+            }
+            else if((newX-currentPosX)>=0.1){
+                currentPosX=currentPosX+0.1;
+            }
+            else if((newX-currentPosX)>=0.01){
+                currentPosX=currentPosX+0.01;
+            }
+
+        }
+        if(newY<currentPosY){
+            if((currentPosY-newY)>=1){
+                currentPosY=currentPosY-1;
+            }
+            else if((currentPosY-newY)>=0.1){
+                currentPosY=currentPosY-0.1;
+            }
+            else if((currentPosY-newY)>=0.01){
+                currentPosY=currentPosY-0.01;
+            }
+
+        }
+        else if(newY>currentPosY){
+            if((newY-currentPosY)>=1){
+                currentPosY=currentPosY+1;
+            }
+            else if((newY-currentPosY)>=0.1){
+                currentPosY=currentPosY+0.1;
+            }
+            else if((newY-currentPosY)>=0.01){
+                currentPosY=currentPosY+0.01;
+            }
+
+        }
 
     }
+    std::cout << "Reached position! \n";
+    std::cout << "Current position is : " << currentPosX << "," << currentPosY << "\n";
 
 }
+
+
+// Returns true if s is a number else false
+bool isNumber(std::string s){
+    for (int i = 0; i < s.length(); i++){
+        if (isdigit(s[i]) == false){return false;}
+        else {return true;}
+    }
+}
+
+void Question_Input(std::string TalBogstav){
+    if(TalBogstav=="Bogstav"){
+        line="";
+        while(line==""){
+            ros::spinOnce();
+        }
+        std::cout << "String is : " << line << "\n";
+    }
+    else if(TalBogstav=="Tal"){
+        bool taltest=false;
+        while(taltest==false){
+            line="";
+
+            while(line==""){
+                ros::spinOnce();
+        
+            }
+            if(isNumber(line)==true){
+                taltest=true;
+            }
+            else{
+                std::cout <<"not a number! Try again\n";
+            }
+
+        }
+        std::cout << "Number is : " << line << "\n";
+    }
+}
+
 
 
 
@@ -77,27 +166,42 @@ void Sensor1(){                 //Used to recive data from Sensor1
 
 
 int input(std::string text){    //Will compare input with sub-function names and return sub-function number
-if (text == "MineSweep" || text =="minesweep"){
+if (text == "MineSweep" || text =="minesweep" || text =="demine" || text =="Demine"){
     return 404;
 }
 else if(text == "Retrive" || text =="retrive"){
     if(BotLocation){
         std::cout << "Found Bot at location : " << BotX << "," << BotY << "\n";
         std::cout << "Use this location? (y/n)" << "\n";
-        std::getline(std::cin, line);
+        Question_Input("Bogstav");
         if(line=="y"){
             std::cout << "Using : " << BotX << "," << BotY << " as location." << "\n";
         }
-        else if(line!="y" || line!="n"){
-            std::cout << "Try again" << "\n";
+        else if(line=="n"){
+            BotLocation=0;
+            //std::cout << "Try again" << "\n";
+            std::cout << "Please input X-Coordinate of bot : " << "\n";
+            Question_Input("Tal");
+            BotX = std::stof(line);
+            std::cout << "Please input Y-Coordinate of bot : " << "\n";
+            Question_Input("Tal");
+            BotY = std::stof(line);
+            std::cout << "Using : " << BotX << "," << BotY << " as location." << "\n";
+            line ="";
+        }
+        else{
+            std::cout <<"Wrong Input!\n";
         }
     }
     else{
         std::cout << "Please input X-Coordinate of bot : " << "\n";
-        std::cin >> BotX;
+        Question_Input("Tal");
+        BotX = std::stof(line);
         std::cout << "Please input Y-Coordinate of bot : " << "\n";
-        std::cin >> BotY;
+        Question_Input("Tal");
+        BotY = std::stof(line);
         std::cout << "Using : " << BotX << "," << BotY << " as location." << "\n";
+        line ="";
     }
 
     return 909;
@@ -119,6 +223,21 @@ else if(text == "STOP" || text =="stop" || text =="Stop"){
 }
 else if(text == "Shut down" || text == "shut down"){
     return 707;
+}
+else if(text == ""){
+    return Current_Work;
+}
+else if(text == "help" || text == "Help"){                               //Print out input options
+    std::cout << "Avaliable commands is :" << "\n";
+    std::cout << "Scan Area" << "\n";
+    std::cout << "MineSweep" << "\n";
+    std::cout << "Retrive" << "\n";
+    std::cout << "Return" << "\n";
+    std::cout << "Low Battery" << "\n";
+    std::cout << "Manual" << "\n";
+    std::cout << "STOP" << "\n";
+    std::cout << "Shut down" << "\n\n";
+    return Current_Work;
 }
 else{                               //Print out input options if wrong
     std::cout << "                                      !!!WRONG INPUT!!!." << "\n";
@@ -154,8 +273,13 @@ void ChangeWork(int ChangeAble){    //Function to change work
     if(ChangeAble != Current_Work){
         Last_Work = Current_Work;
         Current_Work = ChangeAble;
-        std::cout << "Changed work to " << NameTag(Current_Work) << "\n";
+        //std::cout << "Changed work to " << NameTag(Current_Work) << "\n";
     }
+    else{
+        //std::cout << "Same Work. Try again \n";
+        line = "";
+    }
+    
 
 }
 
@@ -192,14 +316,15 @@ void SaveData(){                    //Function to save data locally on a file
 }
 
 
+
 /*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 //Subscriber inputez
 
 void chatterCallBack(const std_msgs::String::ConstPtr& msg){
-    ROS_INFO("I heard this : [%s]", msg->data.c_str());
+    //ROS_INFO("I heard this : [%s]", msg->data.c_str());
     if(msg->data.c_str()!=line){
     line = msg->data.c_str();
-        std::cout <<"line is equal to : " << line << "\n";
+        //std::cout <<"line is equal to : " << line << "\n";
     }
 }
 
@@ -227,34 +352,59 @@ ros::Subscriber UserInputSub = n.subscribe("chatter", 1000, chatterCallBack);
 
 
 /*--------------------------------------------------LOOP--------------------------------------------------*/
-while(ros::ok()){
+while(ros::ok() && running){
 
 
 
  //---------------------------- NEW INPUT
-/*
-if(sub!=""){
-    //std::getline(std::cin, line);
-    //line = msg->data.c_str();
-    std::cout << "You entered : " << line << "\n";
-    if(input(line) != Current_Work){
-        Last_Work = Current_Work;
-        Current_Work = input(line);
-        rate.sleep();
-    }
-}
-*/
 ros::spinOnce();
-//UserInputSub;
+ChangeWork(input(line));
 
-
-
-ROS_INFO("Running case: [%i]", Current_Work);
+//ROS_INFO("Running case: [%i]", Current_Work);
 
 switch (Current_Work){      //Switch to change program funktion
                             //(Scan_area / Sweep the area Etc.)
 case 101: //Scan Area
-    std::cout << "Scanning Area" << "\n";
+    ros::spinOnce();
+    if(AreaLenght || AreaWidth){
+    std::cout << "Pre-known Lenght and width found!" << "\n";
+    std::cout << "Lenght is : " << AreaLenght << "\n";
+    std::cout << "Width is  : " << AreaWidth << "\n";
+    std::cout << "Will you use these sizes? (y/n)" << "\n";
+    Question_Input("Bogstav");
+        if(line=="y"){
+            std::cout << "Using : " << AreaLenght << " and " << AreaWidth << " as Lenght and Width." << "\n";
+        }
+        else if(line=="n"){
+            std::cout << "Do you know the sizes of the Area? (y/n)" << "\n";
+            Question_Input("Bogstav");
+            if(line=="y"){
+                std::cout << "Please input Lenght of Area : " << "\n";
+                Question_Input("Tal");
+                AreaLenght=std::stof(line);
+                std::cout << "Please input Width og Area : " << "\n";
+                Question_Input("Tal");
+                AreaWidth=std::stof(line);
+                std::cout << "Using : " << AreaLenght << " and " << AreaWidth << " as Lenght and Width." << "\n";
+                line="";
+            }
+            else if(line=="n"){
+                line="";
+                std::cout << "Finding Lenght and Width for you \n";
+                //MISSING --> TEMP BUFFER INPUT INSTEAD UNTIL FIXED
+                ChangeWork(101);
+            }
+            else {
+                std::cout << "Try again" << "\n";
+            }
+        }
+        else if(line!="y" || line!="n"){
+            std::cout << "Try again" << "\n";
+        }
+
+    
+    }
+    std::cout << "Scanning Area..." << "\n";
 
     if(AreaLenght || AreaWidth){
     std::cout << "Area Scanned" << "\n";
@@ -265,11 +415,14 @@ case 101: //Scan Area
     break;
 
 case 404: //MineSweep
+    ros::spinOnce();
+    ros::Duration(1).sleep();
     std::cout << "demining..." << "\n";
-
+    
     break;
 
 case 909: //RetrivOtherBot
+    ros::spinOnce();
     StopAll();
     GoTo(BotX, BotY);
     if(BotX==currentPosX && BotY==currentPosY){
@@ -279,6 +432,7 @@ case 909: //RetrivOtherBot
     break;
 
 case 808: //Return
+    ros::spinOnce();
     StopAll();
     GoTo(StartX, StartY); //Go to starting position
     if(StartX==currentPosX && StartY==currentPosY){
@@ -289,6 +443,7 @@ case 808: //Return
     break;
 
 case 001: //LOW BATTERY
+    ros::spinOnce();
     StopAll();
     std::cout << "Low battery! \n Returning" << "\n";
     for(int i=1; i<=3; i++){ros::Duration(0.5).sleep(); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
@@ -298,56 +453,50 @@ case 001: //LOW BATTERY
     break;
 
 case 505: //Manual Takeover
-
+    ros::spinOnce();
+    std::cout << "Manual takeover... (Not made yet)" << "\n";
+    ros::Duration(1).sleep();
+    
     break;
 
 case 002: //STOP
+    ros::spinOnce();
     StopAll();
-    std::cout << "Stopped" << "\n";
-    std::cout << "Waiting for instructions :" << "\n";    
+    std::cout << "Stopped" << "\n\n\n";
+    std::cout << "Waiting for instructions : ('Help' for Avaliable commands)" << "\n";
+    line = "";
     while(Current_Work == 002){
+        ros::spinOnce();
         //std::cout << "STOP - Waiting position :-(" << "\n";
         //std::cout << "Current Work is: " << Current_Work << "\n";
-        //UserInputSub;
-        std::cout <<"line is equal to : " << line << "\n";        
-        ros::spinOnce();
-        //std::getline(std::cin, line);   //Stopping all actions and waiting for indput
-        //    std::cout << "\n You entered : " << line << "\n\n";
-        ChangeWork(input(line));
-        
+        if(line!= ""){
+            std::cout <<"you entered : " << line << "\n";
+            ChangeWork(input(line));
+        }
     }
 
     break;
 
 case 707: //Shut down
+    ros::spinOnce();
     StopAll();
     SaveData();
+    std::cout << "Shutting down";
+        for(int i=1; i<=3; i++){ros::Duration(0.5).sleep(); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
     running=0;
-    std::cout << "Shutting down..." << "\n";
+    std::terminate;
     break;
 
 default: //FEJL
+    ros::spinOnce();
     std::cout << "                         !!!ERROR!!!" << "\n";
     break;
 }
-
-
-
-
-
-
 
 }
     return 0;
 }
 
-
-
-
-
-
-
-//if(Current_Work != Last_Work){}
 
 /*
 //Links for help:

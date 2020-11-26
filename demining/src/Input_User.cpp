@@ -7,6 +7,7 @@
 
 
 std::string Text = "";
+bool running=true;
 
 int main(int argc, char **argv){
 ros::init(argc, argv, "UserInput");
@@ -20,7 +21,7 @@ ros::Rate loop_rate(10);
 int count =0; //To track number of send message to create uniqe string
 
 
-while(ros::ok()){
+while(ros::ok() && running){ //--------------------------------------------
 
 std_msgs::String msg; //This is our message objekt to fill with data and send it
 std::stringstream ss;
@@ -35,7 +36,8 @@ chatter_pub.publish(msg);
 
 ros::spinOnce();
 loop_rate.sleep();
-
+//if(Text == "shut down" || Text == "Shut Down"){running=false;}
+//ros::Duration(10).sleep();
 }
 
 return 0;
