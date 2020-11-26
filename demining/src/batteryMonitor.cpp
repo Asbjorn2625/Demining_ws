@@ -238,6 +238,8 @@ void headHomeToCharge()
   currentPoseSaver(); //Save current location before returning
   std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
 
+  MovingToPosition::moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y);
+  /*
   //Drive towards starting position (following a safe route)
   moveBaseClient client1("move_base");//Starts client as move_base
   client1.waitForServer();            //Wait for feedback from the Action server
@@ -248,25 +250,27 @@ void headHomeToCharge()
 
   if(client1.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
   {
-    //Docking procedure
-    dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
-    client2.waitForServer();                          //Wait for feedback from the Action server
     
-    //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
-    client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
-    client2.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
-
-    if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      std::cout << "Turtlebot reached dock, and is charging" << std::endl;
-    }
-    else
-    {
-      std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
-    }
   }
   else{
     std::cout << "Error did not reach home. Current State: " << client1.getState().toString().c_str() << std::endl;
+  }
+  */
+  //Docking procedure
+  dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
+  client2.waitForServer();                          //Wait for feedback from the Action server
+  
+  //kobuki_msgs::AutoDockingGoal dockingGoal;         //Sets docking as the goal
+  client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
+  client2.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
+
+  if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
+    std::cout << "Turtlebot reached dock, and is charging" << std::endl;
+  }
+  else
+  {
+    std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
   }
 }
 
