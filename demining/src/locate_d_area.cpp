@@ -5,7 +5,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <geometry_msgs/Pose.h>
 
 class MovingToPosition{
 private:
@@ -15,9 +15,10 @@ tf::TransformListener listener;
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 10);
+
 public:
 std::string userInput = "";
-//ros::Publisher deminingArea_pub = n.advertise<std_msgs::Float64MultiArray array_msg>("demining_area_location", 10);
+ros::Publisher deminingArea_pub = n.advertise<geometry_msgs::Pose>("start_position", 10);
 
 double getPosition(double mapPose[]){
 ros::spinOnce();
@@ -203,6 +204,7 @@ while(errors == true){
   int pointsOnMap = mineZone[0]*4;
   double xPoint[pointsOnMap];
   double yPoint[pointsOnMap];
+  geometry_msgs::Pose start_msg;
 
   //moving according to the map
   ros::spinOnce();
@@ -215,13 +217,17 @@ while(errors == true){
   xPoint[0] = minePositions[0]; //saving pos for later
   yPoint[0] = minePositions[1];
 
+  start_msg.position.x = minePositions[0];
+  start_msg.position.y = minePositions[1];
+  start.deminingArea_pub.publish(start_msg);
+
   //calculate angle
   double x_distance = minePositions[0] - startPositions[0];
   double y_distance = minePositions[1] - startPositions[1];
   double heading =atan2(y_distance,x_distance);
   ROS_INFO("heading (%2f)", heading);
 
-for (int i=1;i<pointsOnMap/2; i=i+2){
+for (int i=1;i<mineZone[0]*2+1;){
   if(heading < 0){
   //first point
   xPoint[i] = xPoint[i-1]+mineZone[1]*sin(heading);
@@ -242,11 +248,11 @@ for (int i=1;i<pointsOnMap/2; i=i+2){
   }else{
     std::cout << "failed angle \n";
   }
-  printf("location (%d) = (%f,%f) location (%d+1) = (%f,%f)\n", i,xPoint[i],yPoint[i],i,xPoint[i+1],yPoint[i+1]);
-  //start.deminingArea_pub.publish(xPoint);
-  //start.deminingArea_pub.publish(yPoint);
+  printf("location (%d) = (%f,%f)\nlocation (%d) = (%f,%f)\n", i,xPoint[i],yPoint[i],i+1,xPoint[i+1],yPoint[i+1]);
+  i++;
+  i++;
 }
-for (int i =0;i<pointsOnMap;i++){
+for (int i =1;i<mineZone[0]*4+1;i++){
   loop_rate.sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
 }
