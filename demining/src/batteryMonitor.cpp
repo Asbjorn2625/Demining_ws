@@ -1,11 +1,11 @@
 #include <ros/ros.h>
 #include <iostream> //iostream present for testing and error messages
 
-#include <geometry_msgs/Pose2D.h> //msgs for start pos subscriber
+#include <geometry_msgs/Pose.h> //msgs for start pos subscriber
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/simple_client_goal_state.h>
-#include <nav_msgs/Odometry.h>
+//#include <nav_msgs/Odometry.h>
 
 #include <kobuki_msgs/PowerSystemEvent.h>  //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>      //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
@@ -16,13 +16,38 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 
+//Actionlib
+//typedef actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> dockingClient;
+//typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> moveBaseClient;
+//kobuki_msgs::AutoDockingGoal dockingGoal;
+move_base_msgs::MoveBaseGoal homeGoal;
+
+//Declaration of subscribers
+ros::Subscriber kobukiBatStateSub;
+ros::Subscriber laptopBatlevelSub;
+ros::Subscriber startPoseSub;
+//ros::Subscriber currentPoseSub;
+
+//Declaration of callback messagetypes
+kobuki_msgs::PowerSystemEvent kobBatState;
+sensor_msgs::BatteryState laptopBatLevel;
+//geometry_msgs::Pose startPose;
+//nav_msgs::Odometry odomPose;
+
+//Declaration of global variables
+//geometry_msgs::Pose2D currentPose; //Constantly updated position of robot
+//geometry_msgs::Pose savedPose;   //Saved position before heading home
+
+//Initialisation of global variables
+bool fullyCharged = false;
+
 class MovingToPosition
 {
 private:
   tf::TransformListener listener;
 
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-
+  typedef actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> dockingClient;
 public:
   double getPosition(double mapPose[])
   {
@@ -41,57 +66,28 @@ public:
     mapPose[0] = pMap.pose.position.x;
     mapPose[1] = pMap.pose.position.y;
   }
-  /*
-  void moveTo(double posX, double posY, const char *oriantation)
+  
+  void startDocking() //Docking procedure
   {
-    MoveBaseClient ac("move_base", true);
+    kobuki_msgs::AutoDockingGoal dockingGoal;
+    
+    dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
+    client2.waitForServer();                          //Wait for feedback from the Action server
 
-    //wait for the action server to come up
-    while (!ac.waitForServer(ros::Duration(5.0)))
-    {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-    move_base_msgs::MoveBaseGoal goal;
+    client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
+    client2.waitForResult(ros::Duration(10.0));       //ros::Duration(5.0) for maximum wait time?
 
-    //we'll send a goal to the robot to move 1 meter forward
-    goal.target_pose.header.frame_id = "base_link";
-    goal.target_pose.header.stamp = ros::Time::now();
-
-    goal.target_pose.pose.position.x = posX;
-    goal.target_pose.pose.position.y = posY;
-
-    if (oriantation == "Right")
+    if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
-      goal.target_pose.pose.orientation.w = -sqrt(0.5);
-      goal.target_pose.pose.orientation.z = sqrt(0.5);
-    }
-    else if (oriantation == "Left")
-    {
-      goal.target_pose.pose.orientation.w = sqrt(0.5);
-      goal.target_pose.pose.orientation.z = -sqrt(0.5);
-    }
-    else if (oriantation == "Backwards")
-    {
-      goal.target_pose.pose.orientation.w = 0;
-      goal.target_pose.pose.orientation.z = 1;
+      std::cout << "Turtlebot reached dock, and is charging" << std::endl;
     }
     else
     {
-      goal.target_pose.pose.orientation.w = 1;
-      goal.target_pose.pose.orientation.z = 0;
+      std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
     }
-    ROS_INFO("Sending goal");
-    ac.sendGoal(goal);
-
-    ac.waitForResult();
-
-    if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      ROS_INFO("Sucess, the base moved to the goal");
-    else
-      ROS_INFO("The base failed to move to the goal");
   }
-  */
-  void moveToMap(double posX, double posY, const char *oriantation)
+
+  void moveToDock(double posX, double posY, const char *oriantation)
   {
     MoveBaseClient ac("move_base", true);
 
@@ -136,42 +132,20 @@ public:
     ac.waitForResult();
 
     if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      ROS_INFO("Sucess, the base moved to the goal");
+    {
+      ROS_INFO("Sucess, the base moved to the goal, starting docking");
+      startDocking();
+    }
     else
       ROS_INFO("The base failed to move to the goal");
   }
 };
 
-//Actionlib
-typedef actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> dockingClient;
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> moveBaseClient;
-kobuki_msgs::AutoDockingGoal dockingGoal;
-move_base_msgs::MoveBaseGoal homeGoal;
-
-//Declaration of subscribers
-ros::Subscriber kobukiBatStateSub;
-ros::Subscriber laptopBatlevelSub;
-ros::Subscriber startPoseSub;
-//ros::Subscriber currentPoseSub;
-
-//Declaration of callback messagetypes
-kobuki_msgs::PowerSystemEvent kobBatState;
-sensor_msgs::BatteryState laptopBatLevel;
-geometry_msgs::Pose2D startPose;
-//nav_msgs::Odometry odomPose;
-
-//Declaration of global variables
-//geometry_msgs::Pose2D currentPose; //Constantly updated position of robot
-geometry_msgs::Pose2D savedPose;   //Saved position before heading home
-
-//Initialisation of global variables
-bool fullyCharged = false;
-
 //Callback function saves x and y coordinates from subscriber
-void callbackStartPose(const geometry_msgs::Pose2D startPose)
+void callbackStartPose(const geometry_msgs::Pose startPose)
 {
-  homeGoal.target_pose.pose.position.x = startPose.x;
-  homeGoal.target_pose.pose.position.y = startPose.y;
+  homeGoal.target_pose.pose.position.x = startPose.position.x;
+  homeGoal.target_pose.pose.position.y = startPose.position.y;
   startPoseSub.shutdown(); //Subscriber only needs to update home once (tested this works)
 }
 
@@ -199,23 +173,7 @@ void headHomeToCharge()
   //std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
 
   MovingToPosition moveClass;
-  moveClass.moveToMap(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
-  
-  //Docking procedure
-  dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
-  client2.waitForServer();                          //Wait for feedback from the Action server
-
-  client2.sendGoal(dockingGoal); //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
-  client2.waitForResult();       //ros::Duration(5.0) for maximum wait time?
-
-  if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-  {
-    std::cout << "Turtlebot reached dock, and is charging" << std::endl;
-  }
-  else
-  {
-    std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
-  }
+  moveClass.moveToDock(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
 }
 
 //Function to return to previous location so the robot can resume work
@@ -288,7 +246,7 @@ int main(int argc, char *argv[])
   ros::NodeHandle n;
 
   //Subscribes to the start position detected by another node
-  startPoseSub = n.subscribe("/start_position", 1, callbackStartPose);
+  startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
 
   //Subscribes to the current position of the robot
   //currentPoseSub = n.subscribe("/odom", 1, callbackCurrentPose);
@@ -308,16 +266,18 @@ int main(int argc, char *argv[])
     switch (lastInput)
     {
     case 1:
-      std::cout << "Start position at x = " << startPose.x << ", y = " << startPose.y << std::endl;
+      std::cout << "Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
       break;
     case 2:
       headHomeToCharge();
       break;
     case 3:
-      std::cout << "Ending program" << std::endl;
+      startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
+      ros::spinOnce();
+      std::cout << "Start position reset" << std::endl;
       return 0;
     default:
-      std::cout << "Other input recieved" << std::endl;
+      std::cout << "Other input recieved, Ending program" << std::endl;
     }
   }
   return 0;
