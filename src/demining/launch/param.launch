@@ -1,0 +1,7 @@
+
+
+<rosparam command="load" file="$(find my_pkg)/my_cfg.yaml" />
+<!--rosparam list # List all ROS parameters
+rosparam get /my_parameter # Get my_parameter value
+-->
+

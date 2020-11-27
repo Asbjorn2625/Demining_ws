@@ -1,24 +1,28 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "kobuki_msgs/BumperEvent.h"
+
+ros::Subscriber bumperSub;
 
 
-void chatterCallback(const std_msgs::String::ConstPtr& msg)
-{
-  ROS_INFO("I heard: [%s]", msg->data.c_str());
-}
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv[]){
   
-  ros::init(argc, argv, "listener");
+  ros::init(argc, argv, "evade");
 
 
   ros::NodeHandle n;
 
   
-  ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
+  ros::Subscriber bumperSub = n.subscribe("bumper", 1000);
 
-  ros::spin();
+  while (ros::ok()){
+    if (bumper = 1){
+      std::cout <<"fuck"<< std::endl;
+    };
+  };
+
+
+  ros::spinOnce();
 
   return 0;
-}
+};
