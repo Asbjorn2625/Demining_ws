@@ -10,7 +10,6 @@
 class MovingToPosition{
 private:
 ros::NodeHandle n;
-
 tf::TransformListener listener;
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
@@ -99,6 +98,9 @@ move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.pose.position.x = posX;
   goal.target_pose.pose.position.y = posY;
 
+  goal.target_pose.pose.orientation.w = 1;
+	goal.target_pose.pose.orientation.z = 0;	
+
   ROS_INFO("Sending goal");
   ac.sendGoal(goal);
 
@@ -185,20 +187,6 @@ while(errors == true){
     break;
   }
 }
-
-		//moving according to the robots position
-    /*start.moveTo(-1.0, 0.0, "Backwards");
-    start.getPosition(positionInMap);
-    start.setPoint(positionInMap.pose.position.x,positionInMap.pose.position.y,0.2,0.8, visualization_msgs::Marker::CYLINDER);
-		std::cout << "Starting demining";
-		for (int i=0;i<mineZone[0];i++){
-		start.moveTo(mineZone[1], 0.0, "Right");
-		start.moveTo(0.5, 0.0,"Right");
-    start.moveTo(mineZone[1], 0.0, "Left");
-		start.moveTo(0.5, 0.0,"Left");
-    }*/
-
-  
   double startPositions[3];
   double minePositions[3];
   int pointsOnMap = mineZone[0]*4;
@@ -214,7 +202,7 @@ while(errors == true){
   ros::spinOnce();
   start.getPosition(minePositions);
   printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
-  xPoint[0] = minePositions[0]; //saving pos for later
+  xPoint[0] = minePositions[0]; //saving pos for later, and publishing it
   yPoint[0] = minePositions[1];
 
   start_msg.position.x = minePositions[0];
@@ -227,31 +215,28 @@ while(errors == true){
   double heading =atan2(y_distance,x_distance);
   ROS_INFO("heading (%2f)", heading);
 
-for (int i=1;i<mineZone[0]*2+1;){
-  if(heading < 0){
+for (int i=1;i<mineZone[0]+1;){
   //first point
-  xPoint[i] = xPoint[i-1]+mineZone[1]*sin(heading);
-  yPoint[i] = yPoint[i-1]+mineZone[1]*cos(heading);
-  }else if(heading > 0){
   xPoint[i] = xPoint[i-1]+mineZone[1]*cos(heading);
   yPoint[i] = yPoint[i-1]+mineZone[1]*sin(heading);
-  }else{
-    std::cout << "failed angle \n";
-  }
-  if(heading-M_PI/2 < 0)
-  {//second point
-  xPoint[i+1] = xPoint[i]+0.5*sin(heading-M_PI/2);
-  yPoint[i+1] = yPoint[i]+0.5*cos(heading-M_PI/2);
-  }else if(heading > 0){
-  xPoint[i+1] = xPoint[i]+0.5*cos(heading-M_PI/2);
-  yPoint[i+1] = yPoint[i]+0.5*sin(heading-M_PI/2);
-  }else{
-    std::cout << "failed angle \n";
-  }
-  printf("location (%d) = (%f,%f)\nlocation (%d) = (%f,%f)\n", i,xPoint[i],yPoint[i],i+1,xPoint[i+1],yPoint[i+1]);
-  i++;
-  i++;
+
+  //second point
+  xPoint[i+1] = xPoint[i]+1.0*cos(heading-M_PI/2);
+  yPoint[i+1] = yPoint[i]+1.0*sin(heading-M_PI/2);
+
+  //third point
+  xPoint[i+2] = xPoint[i+1]-mineZone[1]*cos(heading);
+  yPoint[i+2] = yPoint[i+1]-mineZone[1]*sin(heading);
+
+  //fourth point
+  xPoint[i+3] = xPoint[i+2]+1.0*cos(heading-M_PI/2);
+  yPoint[i+3] = yPoint[i+2]+1.0*sin(heading-M_PI/2);
+i = i+4;
 }
+for(int i; i < mineZone[0]*4+1;i++){
+printf("location (%d) = (%f,%f)", i,xPoint[i],yPoint[i]);
+}
+
 for (int i =1;i<mineZone[0]*4+1;i++){
   loop_rate.sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
