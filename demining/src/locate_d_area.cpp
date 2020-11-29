@@ -14,6 +14,7 @@ tf::TransformListener listener;
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 10);
+move_base_msgs::MoveBaseGoal goal;
 
 public:
 std::string userInput = "";
@@ -46,7 +47,6 @@ void moveTo(double posX, double posY, const char* oriantation){
   while(!ac.waitForServer(ros::Duration(5.0))){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
-move_base_msgs::MoveBaseGoal goal;
 
   goal.target_pose.header.frame_id = "base_link";
   goal.target_pose.header.stamp = ros::Time::now();
@@ -92,7 +92,6 @@ void moveToMap(double posX, double posY){
   while(!ac.waitForServer(ros::Duration(5.0))){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
-move_base_msgs::MoveBaseGoal goal;
 
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
@@ -113,52 +112,68 @@ move_base_msgs::MoveBaseGoal goal;
   else{
     ROS_INFO("The base failed to move to the goal. \nDo you wish to continue? y/n \n");
     std::getline(std::cin, userInput);
-    if(userInput == "n"){
+    if(userInput == "n")
       std::exit(0);
-    }
   }
 }
 
 
-void setPointMap(double posX, double posY, double size, double height, uint32_t shape){
-//visualization_msgs::Marker::CYLINDER
-visualization_msgs::Marker marker_array;
-  marker_array.header.frame_id = "/map";
-  marker_array.header.stamp = ros::Time::now();
-  marker_array.ns = "map_pointers";
-  marker_array.id = 0;
-  marker_array.type = shape;
-  marker_array.action = visualization_msgs::Marker::ADD;
-  marker_array.pose.position.x = posX;
-  marker_array.pose.position.y = posY;
-  marker_array.pose.position.z = 0.0;
-  marker_array.pose.orientation.x = 0.0;
-  marker_array.pose.orientation.y = 0.0;
-  marker_array.pose.orientation.z = 0.0;
-  marker_array.pose.orientation.w = 1.0;
+void setPointPath(double posX[],double posY[],int pointAmount){
 
-  marker_array.scale.x = size;
-  marker_array.scale.y = size;
-  marker_array.scale.z = height;
+    visualization_msgs::Marker points, line_strip, line_list;
+    points.header.frame_id = line_strip.header.frame_id = line_list.header.frame_id = "/map";
+    points.header.stamp = line_strip.header.stamp = line_list.header.stamp = ros::Time::now();
+    points.ns = line_strip.ns = line_list.ns = "path_and_turn_points";
+    points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
+    points.pose.orientation.w = line_strip.pose.orientation.w = line_list.pose.orientation.w = 1.0;
 
-  marker_array.color.r = 0.0f;
-  marker_array.color.g = 1.0f;
-  marker_array.color.b = 0.0f;
-  marker_array.color.a = 1.0;
+    points.id = 0;
+    line_strip.id = 1;
+    line_list.id = 2;
 
-marker_array.lifetime = ros::Duration();
+    points.type = visualization_msgs::Marker::POINTS;
+    line_strip.type = visualization_msgs::Marker::LINE_STRIP;
+    line_list.type = visualization_msgs::Marker::LINE_LIST;
 
+    points.scale.x = 0.2;
+    points.scale.y = 0.2;
 
-   while (marker_pub.getNumSubscribers() < 1)
-    {
-      if (!ros::ok())
-      {
-       break;
-      }
-      ROS_WARN_ONCE("Please create a subscriber to the marker");
-      sleep(1);
-    }
-    marker_pub.publish(marker_array);
+    line_strip.scale.x = 0.1;
+    line_list.scale.x = 0.1;
+
+    // Points are red
+    points.color.r = 1.0;
+    points.color.a = 1.0;
+
+    // Line strip is blue
+    line_strip.color.b = 1.0;
+    line_strip.color.a = 1.0;
+
+    // Line list is yellow
+    line_list.color.r = 1.0;
+    line_list.color.g = 1.0;
+    line_list.color.a = 1.0;
+
+    points.lifetime = line_list.lifetime = line_strip.lifetime = ros::Duration();
+
+for(int i=0; i < pointAmount+1; i++){
+      geometry_msgs::Point p;
+      p.x = posX[i];
+      p.y = posY[i];
+
+      points.points.push_back(p);
+      line_strip.points.push_back(p);
+
+      // The line list needs two points for each line
+      line_list.points.push_back(p);
+      p.z += 1;  
+      line_list.points.push_back(p);
+}
+    marker_pub.publish(points);
+    marker_pub.publish(line_strip);
+    marker_pub.publish(line_list);
+
+    ros::Duration(0.3).sleep();
 }
 };
 
@@ -219,7 +234,7 @@ while(errors == true){
   double heading =atan2(y_distance,x_distance);
   ROS_INFO("heading (%2f)", heading);
 
-for (int i=1;i<mineZone[0]+1;){
+for (int i=1;i<pointsOnMap+1;){
   //first point
   xPoint[i] = xPoint[i-1]+mineZone[1]*cos(heading);
   yPoint[i] = yPoint[i-1]+mineZone[1]*sin(heading);
@@ -237,8 +252,15 @@ for (int i=1;i<mineZone[0]+1;){
   yPoint[i+3] = yPoint[i+2]+1.0*sin(heading-M_PI/2);
 i = i+4;
 }
-for(int i; i < mineZone[0]*4+1;i++){
-printf("location (%d) = (%f,%f)", i,xPoint[i],yPoint[i]);
+//last point
+  xPoint[pointsOnMap+1] = xPoint[pointsOnMap]+mineZone[1]*cos(heading);
+  yPoint[pointsOnMap+1] = yPoint[pointsOnMap]+mineZone[1]*sin(heading);
+
+start.setPointPath(xPoint,yPoint,pointsOnMap);
+
+for(int i=0; i < pointsOnMap+1;){
+printf("location (%d) = (%f,%f\n)", i,xPoint[i],yPoint[i]);
+i++;
 }
 
 for (int i =1;i<mineZone[0]*4+1;i++){
@@ -247,8 +269,5 @@ for (int i =1;i<mineZone[0]*4+1;i++){
 }
 		return 0;
 	}
-
-
-
   return 0;
 }
