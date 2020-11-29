@@ -106,7 +106,7 @@ void moveToMap(double posX, double posY){
   ac.sendGoal(goal);
 
   ac.waitForResult();
-
+  ros::Duration(0.2).sleep();
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("Sucess, the base moved to the goal");
   else{
@@ -259,12 +259,12 @@ i = i+4;
 start.setPointPath(xPoint,yPoint,pointsOnMap);
 
 for(int i=0; i < pointsOnMap+1;){
-printf("location (%d) = (%f,%f\n)", i,xPoint[i],yPoint[i]);
+printf("location %d = (%.2f,%.2f)\n", i,xPoint[i],yPoint[i]);
 i++;
 }
 
 for (int i =1;i<mineZone[0]*4+1;i++){
-  loop_rate.sleep();
+  ros::Duration(1.0).sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
 }
 		return 0;
