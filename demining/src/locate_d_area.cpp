@@ -35,6 +35,8 @@ listener.transformPose("map", pBase, pMap);
 
 mapPose[0] = pMap.pose.position.x;
 mapPose[1] = pMap.pose.position.y;
+mapPose[2] = pMap.pose.orientation.w;
+mapPose[3] = pMap.pose.orientation.z;
 }
 
 void moveTo(double posX, double posY, const char* oriantation){
@@ -187,8 +189,8 @@ while(errors == true){
     break;
   }
 }
-  double startPositions[3];
-  double minePositions[3];
+  double startPositions[4];
+  double minePositions[4];
   int pointsOnMap = mineZone[0]*4;
   double xPoint[pointsOnMap];
   double yPoint[pointsOnMap];
@@ -207,6 +209,8 @@ while(errors == true){
 
   start_msg.position.x = minePositions[0];
   start_msg.position.y = minePositions[1];
+  start_msg.orientation.w = minePositions[2];
+  start_msg.orientation.z = minePositions[3];
   start.deminingArea_pub.publish(start_msg);
 
   //calculate angle
