@@ -4,7 +4,7 @@ This is a open source programming project for B336 AAU.
 
 '.cpp' files have given function :
 MineSweeper.cpp
-              Main UI, to change main task and recive input via 'chatter' from 'Input_User.cpp'\n
+              Main UI, to change main task and recive input via 'chatter' from 'Input_User.cpp'
 Input_User.cpp
               Used to recive input from the user via terminal and Publish at 'chatter'
 BatteryMonitor.cpp
