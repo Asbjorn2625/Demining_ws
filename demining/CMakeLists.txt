@@ -15,13 +15,16 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   move_base_msgs 
   actionlib
+  tf
+  nav_msgs
+  visualization_msgs
 )
 
 ###################################
 ## catkin specific configuration ##
 ###################################
 
-  find_package(OpenCV REQUIRED)
+ find_package(OpenCV REQUIRED)
 
   catkin_package()
 ###########
