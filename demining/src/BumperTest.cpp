@@ -79,6 +79,8 @@ ROS_INFO_STREAM("Sending Right");
 int main(int argc, char **argv){ //--------------------------------------------------------
 ros::init(argc, argv, "Bumpertest");
 
+MineReactor running;
+
 ros::NodeHandle n;
 
   //init publisher
@@ -86,95 +88,81 @@ ros::NodeHandle n;
 //Init subscriber
 ros::Subscriber BumberROBSub = n.subscribe("/mobile_base/events/bumper", 1000, BumberROBSubCallBack);
 ros::Subscriber FindingminesNode = n.subscribe("mineCounter",1000, FindMinesSubCallBack);
-ros::Rate rate(10); // 10Hz
+//ros::Rate rate(10); // 10Hz
     
-  //init direction that turtlebot should go
-  geometry_msgs::Twist base_cmd;
-  geometry_msgs::Twist base_cmd_turn_left;
-  geometry_msgs::Twist base_cmd_turn_right;
-  geometry_msgs::Twist base_cmd_turn_back;
-
-  base_cmd.linear.x = 0;
-  base_cmd.linear.y = 0;
-  base_cmd.angular.z = 0;
-  base_cmd_turn_left.linear.x = 0; 
-  base_cmd_turn_left.linear.y = 0;
-  base_cmd_turn_left.angular.z = 0;
-  base_cmd_turn_right.linear.x = 0; 
-  base_cmd_turn_right.linear.y = 0;
-  base_cmd_turn_right.angular.z = 0;
-  base_cmd_turn_back.linear.x = 0; 
-  base_cmd_turn_back.linear.y = 0;
-  base_cmd_turn_back.angular.z = 0;
-
-
-  //and let's go forward by setting X to a positive value
-  base_cmd.linear.x = 0.25;
-  base_cmd.angular.z = 0.0;
-  //ROS_INFO_STREAM("And Crashing ... ctrl + c to stop me :)");
-
-  //base_cmd_turn_left will be used to turn turtlebot 90 degrees
-  base_cmd_turn_back.linear.x = -0.25; //m/s
-  base_cmd_turn_back.angular.z = 0.0; //45 deg/s * 2 sec = 90 degrees 
-
-  //base_cmd_turn_left will be used to turn turtlebot 90 degrees
-  base_cmd_turn_left.linear.x = 0; //m/s
-  base_cmd_turn_left.angular.z = 1.57/2; //45 deg/s * 2 sec = 90 degrees 
-  
-  //base_cmd_turn_right will be used to turn turtlebot -90 degrees
-  base_cmd_turn_right.linear.x = 0; //m/s
-  base_cmd_turn_right.angular.z = -1.57/2; //45 deg/s * 2 sec = 90 degrees 
-
-
-
-
-
 while (ros::ok()){
-std::cout <<"ok!\n";
-
-    if(rotates!=current_rotate && rotates>0){
-      std::cout << "changing rotating\n";
-      current_rotate=rotates;
-      for(int n=10; n>0; n--) {                     //Backing up
-        cmd_vel_pub_.publish(base_cmd_turn_back);
-        rate.sleep();
-        ros::spinOnce();
-      }
-
-    }
-
-    if(rotates>0){
-      std::cout << "changing rotating\n";
-    for(int n=10; n>0; n--) {                     //Rotating left
-      cmd_vel_pub_.publish(base_cmd_turn_left);
-      rate.sleep();
-      ros::spinOnce();
-    }
-    for(int n=10; n>0; n--) {                     //Forward
-      cmd_vel_pub_.publish(base_cmd);
-      rate.sleep();
-      ros::spinOnce();
-    }
-    for(int n=10; n>0; n--) {                     //Rotating right
-      cmd_vel_pub_.publish(base_cmd_turn_right);
-      rate.sleep();
-      ros::spinOnce();
-    }
-    rotates=0;
-    }
 ros::spinOnce();
-base_cmd.linear.x = 0;                            //Stopping
-  base_cmd.linear.y = 0;
-  base_cmd.angular.z = 0;
-  cmd_vel_pub_.publish(base_cmd);
-
 }
-base_cmd.linear.x = 0;                            //Stopping
-  base_cmd.linear.y = 0;
-  base_cmd.angular.z = 0;
-  cmd_vel_pub_.publish(base_cmd);
-
 return 0;
 }
 
 
+
+class MineReactor{
+  private:
+  ros::NodeHandle n;
+  //init publisher
+  ros::Publisher cmd_vel_pub_ = n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/teleop", 1);
+  //Init subscriber
+  ros::Subscriber BumberROBSub = n.subscribe("/mobile_base/events/bumper", 1000, BumberROBSubCallBack);
+  ros::Rate rate(10); // 10Hz
+
+  //init direction that turtlebot should go
+  geometry_msgs::Twist base_cmd;
+
+  void movement(const char* direction, int timer){
+if(direction == "Left"){
+  base_cmd.linear.x = 0;
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = 1.57/2;
+
+}
+
+else if(direction == "Right"){
+  base_cmd.linear.x = 0;
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = -1.57/2;
+}
+
+else if(direction == "Forward"){
+  base_cmd.linear.x = 0.25;
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = 0;
+
+}
+
+else if(direction == "Back"){
+  base_cmd.linear.x = -0.25;
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = 0;
+
+}
+
+else if(direction == "Stop"){
+  base_cmd.linear.x = 0;                            //Stopping
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = 0;
+}
+
+for(int n=timer; n>0; n--) {
+  cmd_vel_pub_.publish(base_cmd);
+  rate.sleep();
+  ros::spinOnce();
+}
+
+}
+
+void Foundmine(const std_msgs::Int32 MineMessage){
+  movement("Stop",1);
+  movement("Back",5);
+  movement("Right",10);
+
+  
+}
+  public:
+    //MineReactor():
+    ros::Subscriber FindingminesNode = n.subscribe("mineCounter",1000, Foundmine);
+    //~MineReactor(){};
+
+
+};
