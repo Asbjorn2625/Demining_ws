@@ -156,7 +156,7 @@ void setPointPath(double posX[],double posY[],int pointAmount){
 
     points.lifetime = line_list.lifetime = line_strip.lifetime = ros::Duration();
 
-for(int i=0; i < pointAmount+1; i++){
+for(int i=0; i < pointAmount; i++){
       geometry_msgs::Point p;
       p.x = posX[i];
       p.y = posY[i];
@@ -253,10 +253,10 @@ for (int i=1;i<pointsOnMap+1;){
 i = i+4;
 }
 //last point
-  xPoint[pointsOnMap+1] = xPoint[pointsOnMap]+mineZone[1]*cos(heading);
-  yPoint[pointsOnMap+1] = yPoint[pointsOnMap]+mineZone[1]*sin(heading);
+  xPoint[pointsOnMap+2] = xPoint[pointsOnMap+1]+mineZone[1]*cos(heading);
+  yPoint[pointsOnMap+2] = yPoint[pointsOnMap+1]+mineZone[1]*sin(heading);
 
-start.setPointPath(xPoint,yPoint,pointsOnMap);
+start.setPointPath(xPoint,yPoint,pointsOnMap+2);
 
 for(int i=0; i < pointsOnMap+1;){
 printf("location %d = (%.2f,%.2f)\n", i,xPoint[i],yPoint[i]);
