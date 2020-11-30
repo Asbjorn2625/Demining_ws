@@ -46,6 +46,8 @@ private:
   
   std_msgs::Int32 intMessage;
 
+  
+
 public:
   void setPointMap(double posX, double posY, double size, double height, uint32_t shape)
   {
@@ -169,7 +171,7 @@ public:
         cv::approxPolyDP(contours[i], contours_poly[i], 3, true);
         boundRect[i] = cv::boundingRect(contours_poly[i]);
         double area = cv::contourArea(contours[i]);
-        if (area <= 50 && currentTimer + delay < ros::Time::now())
+        if (area >= 50 && currentTimer + delay < ros::Time::now())
         {
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
