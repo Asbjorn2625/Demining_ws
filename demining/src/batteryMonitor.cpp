@@ -5,7 +5,6 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/simple_client_goal_state.h>
-//#include <nav_msgs/Odometry.h>
 
 #include <kobuki_msgs/PowerSystemEvent.h>  //Kobuki_node capable of detecting changes to the Power system http://docs.ros.org/en/api/kobuki_msgs/html/msg/PowerSystemEvent.html
 #include <sensor_msgs/BatteryState.h>      //Used for laptop battery information (could be used for Kobuki as well but havent figured out how yet)
@@ -26,20 +25,16 @@ move_base_msgs::MoveBaseGoal homeGoal;
 ros::Subscriber kobukiBatStateSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
-//ros::Subscriber currentPoseSub;
 
 //Declaration of callback messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
 sensor_msgs::BatteryState laptopBatLevel;
-//geometry_msgs::Pose startPose;
-//nav_msgs::Odometry odomPose;
 
-//Declaration of global variables
-//geometry_msgs::Pose2D currentPose; //Constantly updated position of robot
-//geometry_msgs::Pose savedPose;   //Saved position before heading home
-
-//Initialisation of global variables
-bool fullyCharged = false;
+//Initialisation and declaration of global variables
+geometry_msgs::Twist standStill_msgs;
+bool fullyCharged = false;        //
+double savedPose[2];              //
+double laptopBatteryPercentage;   //Has to be double as sensor_msgs::BatteryState laptopBatLevel.percentage is a double
 
 class MovingToPosition
 {
@@ -49,7 +44,7 @@ private:
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
   typedef actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> dockingClient;
 public:
-  double getPosition(double mapPose[])
+  double getPosition(double mapPose[])//Function records a pair of x and y coordinates in an array at index 0 and 1
   {
     ros::spinOnce();
     geometry_msgs::PoseStamped pBase, pMap;
@@ -79,7 +74,7 @@ public:
 
     if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
-      std::cout << "Turtlebot reached dock, and is charging" << std::endl;
+      ROS_INFO("Turtlebot reached dock, and is charging");
     }
     else
     {
@@ -149,40 +144,31 @@ void callbackStartPose(const geometry_msgs::Pose startPose)
   startPoseSub.shutdown(); //Subscriber only needs to update home once (tested this works)
 }
 
-//Callback function saves x and y coordinates from subscriber
-//void callbackCurrentPose(const nav_msgs::Odometry odomPose)
-//{
-//  currentPose.x = odomPose.pose.pose.position.x;
-//  currentPose.y = odomPose.pose.pose.position.y;
-//}
-
-//Function saves current position
-//double currentPoseSaver()
-//{
-//  ros::spinOnce();
-//  savedPose.x = currentPose.x;
-//  savedPose.y = currentPose.y;
-//}
-
 //Function for sending the robot back to the dock
 void headHomeToCharge()
 {
   //Stop current task
 
-  //currentPoseSaver(); //Save current location before returning
-  //std::cout << "Currently at x = " << savedPose.x << ", y = " << savedPose.y << std::endl;
-
   MovingToPosition moveClass;
+
+  moveClass.getPosition(savedPose);
+  std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
+
   moveClass.moveToDock(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
 }
 
 //Function to return to previous location so the robot can resume work
-//void resumeDemining()
-//{
-  //Drive out of dock
+void resumeDemining()
+{
+  //Move out of dock (badness 10000)
+  MovingToPosition moveClass;
+  moveClass.moveToDock(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Backwards");
+  
   //Find its way back towards saved location
+  moveClass.moveToDock(savedPose[0], savedPose[1], "Forwards");
+  
   //Resume demining task
-//}
+}
 
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //removed & before kobBatState
 {
@@ -212,13 +198,13 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //r
     break;
 
   case 4: //Base is low on battery (15%)
-    std::cout << "Base is low on battery. Pausing operation and heading to dock" << std::endl;
+    std::cout << "Base is low on battery (15%). Pausing operation and heading to dock" << std::endl;
 
     headHomeToCharge(); //Send robot home to recharge base
     break;
 
   case 5: //Base battery level is critical! (5%)
-    std::cout << "Base battery level is critical!" << std::endl;
+    std::cout << "Base battery level is critical! (5%)" << std::endl;
     break;
 
   default: //Error! this should be unreachable
@@ -229,14 +215,26 @@ void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //r
 
 void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 {
-  std::cout << "Laptop battery is currently at " << laptopBatLevel.percentage << "%" << std::endl;
+  laptopBatteryPercentage = laptopBatLevel.percentage;
 
   //Testet og virker
   if (laptopBatLevel.percentage <= 15 && laptopBatLevel.power_supply_status != 1) //When laptop reaches 15% remaining power it the robot shall return home
   {
-    std::cout << "Laptop is low on battery. Pausing operation and heading to dock" << std::endl;
+    std::cout << "Laptop is low on battery (15%). Pausing operation and heading to dock" << std::endl;
 
     headHomeToCharge(); //Send robot home to recharge laptop
+  }
+  else if (laptopBatLevel.percentage <= 5 && laptopBatLevel.power_supply_status != 1) //When laptop reaches 15% remaining power it the robot shall return home
+  {
+    std::cout << "Laptop battery level is critical! (5%)" << std::endl;
+
+    headHomeToCharge(); //Send robot home to recharge laptop
+  }
+  else if (laptopBatLevel.percentage == 100 && laptopBatLevel.power_supply_status == 1)
+  {
+    fullyCharged = true;
+
+    //resumeDemining(); //Return to demining task
   }
 }
 
@@ -244,12 +242,10 @@ int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "batteryMonitor"); //initialises node as batteryMonitor
   ros::NodeHandle n;
+  MovingToPosition moveClass;
 
   //Subscribes to the start position detected by another node
   startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
-
-  //Subscribes to the current position of the robot
-  //currentPoseSub = n.subscribe("/odom", 1, callbackCurrentPose);
 
   //Subscribes to the laptop battery
   laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
@@ -260,8 +256,9 @@ int main(int argc, char *argv[])
   int lastInput;
   while (ros::ok())
   {
+    ros::Publisher standStillPub = n.advertise<geometry_msgs::Twist> ("cmd_vel_mux/input/teleop", 1);
     ros::spinOnce(); //Updates all subscribed and published information
-    std::cout << "input a number from 1 to 3: " << std::endl;
+    std::cout << "input a number from 1 to 5: " << std::endl;
     std::cin >> lastInput;
     switch (lastInput)
     {
@@ -270,14 +267,27 @@ int main(int argc, char *argv[])
       break;
     case 2:
       headHomeToCharge();
+      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
       break;
     case 3:
       startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
       ros::spinOnce();
       std::cout << "Start position reset" << std::endl;
       return 0;
+    case 4:
+      moveClass.getPosition(savedPose);
+      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
+      break;
+    case 5:
+      ros::spinOnce();
+      std::cout << "Laptop battery is currently at " << laptopBatteryPercentage << "%" << std::endl;
+      break;
+    case 6:
+      resumeDemining();
+      break;
     default:
       std::cout << "Other input recieved, Ending program" << std::endl;
+      return 0;
     }
   }
   return 0;
