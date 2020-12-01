@@ -6,6 +6,7 @@ add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+<<<<<<< HEAD
   roscpp
   turtlesim
   sensor_msgs
@@ -18,11 +19,29 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   nav_msgs
   visualization_msgs
+=======
+roscpp
+turtlesim
+sensor_msgs
+cv_bridge
+std_msgs
+image_transport
+geometry_msgs
+move_base_msgs 
+actionlib
+tf
+nav_msgs
+visualization_msgs
+>>>>>>> Asbjørns-legeplads
 )
 
 ###################################
 ## catkin specific configuration ##
 ###################################
+<<<<<<< HEAD
+=======
+
+>>>>>>> Asbjørns-legeplads
 
  find_package(OpenCV REQUIRED)
 
@@ -36,7 +55,7 @@ include_directories(
   )
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
-add_executable(hello_world src/hello_world.cpp)
+add_executable(mine_detector src/mine_detector.cpp)
 add_executable(calibration src/calibration.cpp)
 #add_executable(MineSweeper src/MineSweeper.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
@@ -44,7 +63,7 @@ add_executable(batteryMonitor src/batteryMonitor.cpp)
 add_executable(coordinatePublisher src/coordinatePublisher.cpp)
 
 # Link to Catkin libraries
-target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(mine_detector ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 #target_link_libraries(MineSweeper ${catkin_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES})
@@ -57,7 +76,11 @@ target_link_libraries(coordinatePublisher ${catkin_LIBRARIES})
 ############w#
 
 # Mark executables for installation
+<<<<<<< HEAD
 install(TARGETS hello_world locate_d_area calibration 
+=======
+install(TARGETS mine_detector locate_d_area calibration
+>>>>>>> Asbjørns-legeplads
 
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
