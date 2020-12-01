@@ -20,13 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 ## catkin specific configuration ##
 ###################################
-find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    sensor_msgs
-    std_msgs
-    cv_bridge
-    image_transport
-  )
+
 
   find_package(OpenCV REQUIRED)
 
@@ -40,12 +34,12 @@ include_directories(
   )
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
-add_executable(hello_world src/hello_world.cpp)
+add_executable(mine_detector src/mine_detector.cpp)
 add_executable(calibration src/calibration.cpp)
 #add_executable(MineSweeper src/MineSweeper.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 # Link to Catkin libraries
-target_link_libraries(hello_world ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(mine_detector ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 #target_link_libraries(MineSweeper
@@ -63,7 +57,7 @@ target_link_libraries(locate_d_area
 ############w#
 
 # Mark executables for installation
-install(TARGETS hello_world locate_d_area calibration
+install(TARGETS mine_detector locate_d_area calibration
 
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
