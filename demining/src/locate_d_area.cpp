@@ -253,8 +253,8 @@ for (int i=1;i<pointsOnMap+1;){
 i = i+4;
 }
 //last point
-  xPoint[pointsOnMap+2] = xPoint[pointsOnMap+1]+mineZone[1]*cos(heading);
-  yPoint[pointsOnMap+2] = yPoint[pointsOnMap+1]+mineZone[1]*sin(heading);
+  xPoint[pointsOnMap+1] = xPoint[pointsOnMap]+mineZone[1]*cos(heading);
+  yPoint[pointsOnMap+1] = yPoint[pointsOnMap]+mineZone[1]*sin(heading);
 
 start.setPointPath(xPoint,yPoint,pointsOnMap+2);
 
