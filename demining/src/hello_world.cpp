@@ -6,8 +6,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <kobuki_msgs/Sound.h>
-#include <std_msgs/Int32.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_listener.h>
+
 
 cv::Mat HSVImage;
 cv::Mat ThreshImage;
@@ -25,12 +28,14 @@ cv::Scalar red(4, 0, 255);
 cv::Scalar NavyBlue(237, 27, 36);
 
 static const std::string OPENCV_WINDOW = "Image window";
-static const std::string Hamburg = "HSV Image";
-static const std::string Mine = "Miner";
+
+
 
 int mineCounter = 0;
+int markerId;
 ros::Time currentTimer;
 int firstRun = 0;
+int img_num = 0;
 
 class ImageConverter
 {
@@ -39,45 +44,73 @@ private:
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_; 
   image_transport::Publisher image_pub_;
+  tf::TransformListener listener;
   kobuki_msgs::Sound soundMSG;
   ros::Publisher sound_pub =nh_.advertise<kobuki_msgs::Sound>("/mobile_base/commands/sound", 2);
-  ros::Publisher marker_pub = nh_.advertise<visualization_msgs::Marker>("mining_markers", 1);
-  ros::Publisher mine_pub = nh_.advertise<std_msgs::Int32>("mineCounter",1);
-  
-  std_msgs::Int32 intMessage;
-
-  
+  ros::Publisher marker_pub = nh_.advertise<visualization_msgs::MarkerArray>("mine_markers", 1);
+  ros::Publisher mine_pub = nh_.advertise<geometry_msgs::PoseStamped>("mineCounter",1);
+  geometry_msgs::PoseStamped mineMessage,pBase, pMap;
 
 public:
+
+double getMinePosition(double mapPose[]){
+ros::spinOnce();
+
+pBase.header.frame_id = "base_link";
+pBase.pose.position.x = 0.0;
+pBase.pose.position.y = 0.0;
+pBase.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+ros::Time current_transform = ros::Time::now();
+ros::Duration(0.2).sleep();
+listener.getLatestCommonTime(pBase.header.frame_id, "map", current_transform, NULL);
+ros::Duration(0.2).sleep();
+pBase.header.stamp = current_transform;
+listener.transformPose("map", pBase, pMap);
+
+double siny_cosp = 2 * (pMap.pose.orientation.w * pMap.pose.orientation.z);
+double cosy_cosp = 1 - 2 * (pMap.pose.orientation.z * pMap.pose.orientation.z);
+double radians = std::atan2(siny_cosp, cosy_cosp);
+
+mapPose[0] = pMap.pose.position.x+0.5*cos(radians);
+mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
+}
+
+
   void setPointMap(double posX, double posY, double size, double height, uint32_t shape)
   {
     //visualization_msgs::Marker::CYLINDER
-    visualization_msgs::Marker marker_array;
-    marker_array.header.frame_id = "/base_link";
-    marker_array.header.stamp = ros::Time::now();
-    marker_array.ns = "map_pointers";
-    marker_array.id = 0;
-    marker_array.type = shape;
-    marker_array.action = visualization_msgs::Marker::ADD;
-    marker_array.pose.position.x = posX;
-    marker_array.pose.position.y = posY;
-    marker_array.pose.position.z = 0.0;
-    marker_array.pose.orientation.x = 0.0;
-    marker_array.pose.orientation.y = 0.0;
-    marker_array.pose.orientation.z = 0.0;
-    marker_array.pose.orientation.w = 1.0;
+    visualization_msgs::Marker marker;
+    visualization_msgs::MarkerArray marker_array;
+    marker.header.frame_id = "/base_link";
+    marker.header.stamp = ros::Time::now();
+    marker.ns = "mine_pointers";
+    if(firstRun = 0){
+    int markerId = 0;
+    }
+    markerId++;
+    marker.id = markerId;
+    marker.type = shape;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = posX;
+    marker.pose.position.y = posY;
+    marker.pose.position.z = 0.0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
 
-    marker_array.scale.x = size;
-    marker_array.scale.y = size;
-    marker_array.scale.z = height;
+    marker.scale.x = size;
+    marker.scale.y = size;
+    marker.scale.z = height;
 
-    marker_array.color.r = 0.0f;
-    marker_array.color.g = 1.0f;
-    marker_array.color.b = 0.0f;
-    marker_array.color.a = 1.0;
+    marker.color.r = 0.0f;
+    marker.color.g = 1.0f;
+    marker.color.b = 0.0f;
+    marker.color.a = 1.0;
 
-    marker_array.lifetime = ros::Duration();
+    marker.lifetime = ros::Duration();
 
+    marker_array.markers.push_back(marker);
     while (marker_pub.getNumSubscribers() < 1)
     {
       if (!ros::ok())
@@ -94,7 +127,7 @@ public:
       : it_(nh_)
   {
     // Subscribe to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1,
+    image_sub_ = it_.subscribe("/camera2/rgb/image_raw", 1,
                                &ImageConverter::imageCb, this);
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
@@ -176,12 +209,18 @@ public:
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
-          soundMSG.value=5;
+          soundMSG.value=3;
           sound_pub.publish(soundMSG);
-          //cv::imwrite(Mine, cv_ptr->image);
+          cv::imwrite(cv::format("mine%d.jpg",img_num), cv_ptr->image);
+          
           mineCounter++;
-          intMessage.data=mineCounter;
-          mine_pub.publish(intMessage);
+          double currentPos[4];
+          getMinePosition(currentPos);
+          mineMessage.header.frame_id=std::to_string(mineCounter);
+          mineMessage.pose.position.x = currentPos[0];
+          mineMessage.pose.position.y = currentPos[1];
+          mine_pub.publish(mineMessage);
+          img_num++;
         };
 
         // Drawing the contours on our image window
