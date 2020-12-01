@@ -1,6 +1,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <turtlesim/TeleportAbsolute.h>
 #include <turtlesim/Color.h>
 #include <turtlesim/SetPen.h>
@@ -8,6 +9,7 @@
 //#include <conio.h> //Not recommented but should be able to read if input is avaliable
 #include "stdlib.h"
 #include <stdio.h> // To input shit
+#include <ctime>
 #include "time.h"
 #include <string>
 #include <sstream>
@@ -40,6 +42,10 @@ std::ofstream myfile;
 
 
 int FoundMines = 0;     //Number of found mines
+float CurrentMinePosX;
+float CurrentMinePosY;
+float minePosX[1000];
+float minePosY[1000];
 
 //Other bots locations
 int BotLocation=1;
@@ -112,6 +118,7 @@ void GoTo(float newX, float newY){ //Go to given location
     std::cout << "Current position is : " << currentPosX << "," << currentPosY << "\n";
 
 }
+
 
 
 // Returns true if s is a number else false
@@ -286,6 +293,7 @@ void ChangeWork(int ChangeAble){    //Function to change work
 void StopAll(){                     //Function to stop all actions
     std::cout << "Stopping All Actions and Movements" << "\n";
 
+//cmd_vel_pub_.publish(base_cmd);
 
 }
 
@@ -293,18 +301,27 @@ void SaveData(){                    //Function to save data locally on a file
     int counter=1;
     while(counter){
         std::cout << "Saving Data" << "\n";
-        myfile.open ("example.txt");
+        myfile.open ("The Program that dosn't work.txt", std::fstream::app);
         if(myfile.is_open()){
-            //myfile << "Saving from this run. Date/time : " << ros::Time::now() << "\n";
-            myfile << "Found mines: " << FoundMines << "\n";
-            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << "equals to : " << AreaLenght*AreaWidth << "m²" << "\n";
-            myfile << "\n \n " << "\n";
+            time_t timeNow = time(0);
+            myfile << "                         Saving from this run. Date/time : " << ctime(&timeNow) << "\n";
+            if(FoundMines!=0){
+                myfile << "Found mines: " << FoundMines << "\n";
+                myfile << "     Mine(s) is located at : \n";
+                    for(int i=1; i<=FoundMines;i++){
+                        myfile << "Mine " << i << " at : " << minePosX[i] << "," << minePosY[i] << "\n\n";
+                    }
+            }
+            else{ myfile << "No Mines Found \n";}
+            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << " equals to : " << AreaLenght*AreaWidth << "m²" << "\n";
+            myfile << "\n";
+            myfile << "you Launched MineSweeper an got this!\n\n\n\n\n";
             myfile.close();
             counter=0;
         }
         else if(counter>=20){
             std::cout << "ERROR - Creating file..." << "\n";
-            myfile.open("example.txt", std::fstream::out);
+            myfile.open("The Program that dosn't work.txt", std::fstream::out);
             counter=1;
         }
         else{
@@ -328,6 +345,16 @@ void chatterCallBack(const std_msgs::String::ConstPtr& msg){
     }
 }
 
+void mineCounterCallBack(const geometry_msgs::PoseStamped MineMessage){
+    CurrentMinePosX = MineMessage.pose.position.x;
+    CurrentMinePosY = MineMessage.pose.position.y;
+    FoundMines++;
+    minePosX[FoundMines] = CurrentMinePosX;
+    minePosY[FoundMines] = CurrentMinePosY;
+    std::cout << "Got a Mine!\n";
+    std::cout << "Mine " << FoundMines << " at : " << minePosX[FoundMines] << "," << minePosY[FoundMines] << "\n\n";
+
+}
 
 
 
@@ -344,12 +371,21 @@ ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to s
 
 //Publishers
 //ros::Publisher
+  //init publisher
+  ros::Publisher cmd_vel_pub_ = n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/teleop", 1);
 
 //subscribers
 ros::Subscriber UserInputSub = n.subscribe("chatter", 1000, chatterCallBack);
+ros::Subscriber GetMinePos = n.subscribe("mineCounter",1000, mineCounterCallBack);
 //ros::Subscriber BumberROBSub = n.subscribe("/mobile_base/events/bumper", 1000, BumberROBSubCallBack);
 //ros::Subscriber
 
+  //init direction that turtlebot should go
+  geometry_msgs::Twist base_cmd;
+
+  base_cmd.linear.x = 0;                            //Stopping
+  base_cmd.linear.y = 0;
+  base_cmd.angular.z = 0;
 
 /*--------------------------------------------------LOOP--------------------------------------------------*/
 while(ros::ok() && running){
@@ -467,6 +503,8 @@ case 002: //STOP
     line = "";
     while(Current_Work == 002){
         ros::spinOnce();
+        //StopAll();
+        cmd_vel_pub_.publish(base_cmd);
         //std::cout << "STOP - Waiting position :-(" << "\n";
         //std::cout << "Current Work is: " << Current_Work << "\n";
         if(line!= ""){
@@ -482,7 +520,8 @@ case 707: //Shut down
     StopAll();
     SaveData();
     std::cout << "Shutting down";
-        for(int i=1; i<=3; i++){ros::Duration(0.5).sleep(); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
+        //for(int i=1; i<=3; ++i){ros::Duration(1.5).sleep(); std::cout << ".";} //Niceness --> counting to 1.5 sec (as delay)
+    std::cout <<"\n";
     running=0;
     std::terminate;
     break;
@@ -498,11 +537,12 @@ default: //FEJL
 }
 
 
-/*
-//Links for help:
 
 
-- Move a certain distance, turn, then move (Odometry topic)
-        https://answers.ros.org/question/205132/move-a-certain-distance-turn-then-move-odometry-topic/?answer=269733
 
-*/ 
+
+
+
+
+
+
