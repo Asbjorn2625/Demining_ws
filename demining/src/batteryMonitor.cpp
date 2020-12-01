@@ -31,10 +31,9 @@ kobuki_msgs::PowerSystemEvent kobBatState;
 sensor_msgs::BatteryState laptopBatLevel;
 
 //Initialisation and declaration of global variables
-geometry_msgs::Twist standStill_msgs;
-bool fullyCharged = false;        //
-double savedPose[2];              //
-double laptopBatteryPercentage;   //Has to be double as sensor_msgs::BatteryState laptopBatLevel.percentage is a double
+bool fullyCharged = false;      //
+double savedPose[2];            //
+double laptopBatteryPercentage; //Has to be double as sensor_msgs::BatteryState laptopBatLevel.percentage is a double
 
 class MovingToPosition
 {
@@ -66,19 +65,20 @@ public:
   {
     kobuki_msgs::AutoDockingGoal dockingGoal;
     
-    dockingClient client2("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
-    client2.waitForServer();                          //Wait for feedback from the Action server
+    dockingClient dc("dock_drive_action", true); //Starts client, needs to be called "dock_drive_action" to work (true -> don't need ros::spin())
+    dc.waitForServer();                          //Wait for feedback from the Action server
 
-    client2.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
-    client2.waitForResult(ros::Duration(10.0));       //ros::Duration(5.0) for maximum wait time?
+    dc.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
+    dc.waitForResult(ros::Duration(10.0));       //ros::Duration(5.0) for maximum wait time?
 
-    if (client2.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+    if (dc.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
-      ROS_INFO("Turtlebot reached dock, and is charging");
+      ROS_INFO("Turtlebot reached dock");
     }
     else
     {
-      std::cout << "Error did not reach dock. Current State: " << client2.getState().toString().c_str() << std::endl;
+      ROS_INFO("Turtlebot failed to reach dock, current state", dc.getState().toString().c_str());
+      //std::cout << "Error did not reach dock. Current State: " << dc.getState().toString().c_str() << std::endl;
     }
   }
 
@@ -141,7 +141,7 @@ void callbackStartPose(const geometry_msgs::Pose startPose)
 {
   homeGoal.target_pose.pose.position.x = startPose.position.x;
   homeGoal.target_pose.pose.position.y = startPose.position.y;
-  startPoseSub.shutdown(); //Subscriber only needs to update home once (tested this works)
+  startPoseSub.shutdown(); //Subscriber only needs to update home once (tested this, works)
 }
 
 //Function for sending the robot back to the dock
@@ -152,7 +152,7 @@ void headHomeToCharge()
   MovingToPosition moveClass;
 
   moveClass.getPosition(savedPose);
-  std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
+  //std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
 
   moveClass.moveToDock(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
 }
@@ -217,19 +217,23 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 {
   laptopBatteryPercentage = laptopBatLevel.percentage;
 
-  //Testet og virker
-  if (laptopBatLevel.percentage <= 15 && laptopBatLevel.power_supply_status != 1) //When laptop reaches 15% remaining power it the robot shall return home
+  //When laptop reaches 15% remaining power it the robot shall return home
+  if (laptopBatLevel.percentage <= 15 && laptopBatLevel.power_supply_status != 1)
   {
-    std::cout << "Laptop is low on battery (15%). Pausing operation and heading to dock" << std::endl;
+    std::cout << "Laptop is low on battery (" << laptopBatLevel.percentage << "%). Heading to dock" << std::endl;
 
     headHomeToCharge(); //Send robot home to recharge laptop
   }
-  else if (laptopBatLevel.percentage <= 5 && laptopBatLevel.power_supply_status != 1) //When laptop reaches 15% remaining power it the robot shall return home
-  {
-    std::cout << "Laptop battery level is critical! (5%)" << std::endl;
 
-    headHomeToCharge(); //Send robot home to recharge laptop
+  //When laptop reaches 5% remaining power it will send a message for testing the requirement
+  else if (laptopBatLevel.percentage <= 5 && laptopBatLevel.power_supply_status != 1)
+  {
+    std::cout << "Laptop battery level is critical! (" << laptopBatLevel.percentage << "%)" << std::endl;
+
+    headHomeToCharge(); //Send robot should not stop trying to get home
   }
+
+  //When the laptop is fully charged it will move back to the demining task
   else if (laptopBatLevel.percentage == 100 && laptopBatLevel.power_supply_status == 1)
   {
     fullyCharged = true;
@@ -244,47 +248,51 @@ int main(int argc, char *argv[])
   ros::NodeHandle n;
   MovingToPosition moveClass;
 
-  //Subscribes to the start position detected by another node
+  //Subscribes to the start position determined by another node
   startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
 
   //Subscribes to the laptop battery
   laptopBatlevelSub = n.subscribe("/laptop_charge", 1, callbackLaptopBat);
 
-  //Subscibes to the PowerSystemEvent message, it updates whenever a power systems related issue happens
+  //Subscibes to the PowerSystemEvent message, it updates whenever something happens with the power system of the kobuki base
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
+  //The following is for testing only
   int lastInput;
   while (ros::ok())
   {
-    ros::Publisher standStillPub = n.advertise<geometry_msgs::Twist> ("cmd_vel_mux/input/teleop", 1);
     ros::spinOnce(); //Updates all subscribed and published information
-    std::cout << "input a number from 1 to 5: " << std::endl;
+    std::cout << "input a number from 1 to 7: " << std::endl;
     std::cin >> lastInput;
+
     switch (lastInput)
     {
     case 1:
       std::cout << "Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
       break;
     case 2:
-      headHomeToCharge();
-      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
-      break;
-    case 3:
       startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
       ros::spinOnce();
       std::cout << "Start position reset" << std::endl;
-      return 0;
-    case 4:
+      break;
+    case 3:
       moveClass.getPosition(savedPose);
       std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
       break;
-    case 5:
+    case 4:
       ros::spinOnce();
       std::cout << "Laptop battery is currently at " << laptopBatteryPercentage << "%" << std::endl;
+      break;
+    case 5:
+      headHomeToCharge();
+      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
       break;
     case 6:
       resumeDemining();
       break;
+    case 7:
+      ros::spin();
+      return 0;
     default:
       std::cout << "Other input recieved, Ending program" << std::endl;
       return 0;
