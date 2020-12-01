@@ -6,15 +6,18 @@ add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  turtlesim
-  sensor_msgs
-  cv_bridge
-  std_msgs
-  image_transport
-  geometry_msgs
-  move_base_msgs 
-  actionlib
+roscpp
+turtlesim
+sensor_msgs
+cv_bridge
+std_msgs
+image_transport
+geometry_msgs
+move_base_msgs 
+actionlib
+tf
+nav_msgs
+visualization_msgs
 )
 
 ###################################
