@@ -209,9 +209,9 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
-          soundMSG.value=3;
+          soundMSG.value=6;
           sound_pub.publish(soundMSG);
-          cv::imwrite(cv::format("mine%d.jpg",img_num), cv_ptr->image);
+          cv::imwrite(cv::format("demining_project/Mine_Pictures/mine%d.jpg",img_num), cv_ptr->image);
           
           mineCounter++;
           double currentPos[4];
