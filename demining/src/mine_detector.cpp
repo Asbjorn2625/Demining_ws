@@ -211,7 +211,7 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
           soundMSG.value=3;
           sound_pub.publish(soundMSG);
-          cv::imwrite(cv::format("mine%d.jpg",img_num), cv_ptr->image);
+          cv::imwrite(cv::format("mine%d.bmp",img_num), cv_ptr->image);
           
           mineCounter++;
           double currentPos[4];
