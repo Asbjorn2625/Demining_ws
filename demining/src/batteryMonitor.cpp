@@ -77,8 +77,7 @@ public:
     }
     else
     {
-      ROS_INFO("Turtlebot failed to reach dock, current state", dc.getState().toString().c_str());
-      //std::cout << "Error did not reach dock. Current State: " << dc.getState().toString().c_str() << std::endl;
+      ROS_INFO("Turtlebot failed to reach dock");
     }
   }
 
@@ -150,13 +149,11 @@ void headHomeToCharge()
   //Stop current task
 
   MovingToPosition moveClass;
-
   moveClass.getPosition(savedPose);
-  //std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
-
   moveClass.moveToDock(homeGoal.target_pose.pose.position.x, homeGoal.target_pose.pose.position.y, "Forwards");
 }
 
+/*
 //Function to return to previous location so the robot can resume work
 void resumeDemining()
 {
@@ -169,6 +166,7 @@ void resumeDemining()
   
   //Resume demining task
 }
+*/
 
 void callbackKobukiBatState(const kobuki_msgs::PowerSystemEvent kobBatState) //removed & before kobBatState
 {
@@ -233,6 +231,7 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
     headHomeToCharge(); //Send robot should not stop trying to get home
   }
 
+  /*
   //When the laptop is fully charged it will move back to the demining task
   else if (laptopBatLevel.percentage == 100 && laptopBatLevel.power_supply_status == 1)
   {
@@ -240,6 +239,7 @@ void callbackLaptopBat(const sensor_msgs::BatteryState laptopBatLevel)
 
     //resumeDemining(); //Return to demining task
   }
+  */
 }
 
 int main(int argc, char *argv[])
@@ -271,26 +271,10 @@ int main(int argc, char *argv[])
       std::cout << "Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
       break;
     case 2:
-      startPoseSub = n.subscribe("start_position", 1, callbackStartPose);
-      ros::spinOnce();
-      std::cout << "Start position reset" << std::endl;
-      break;
-    case 3:
-      moveClass.getPosition(savedPose);
-      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
-      break;
-    case 4:
-      ros::spinOnce();
-      std::cout << "Laptop battery is currently at " << laptopBatteryPercentage << "%" << std::endl;
-      break;
-    case 5:
       headHomeToCharge();
       std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
       break;
-    case 6:
-      resumeDemining();
-      break;
-    case 7:
+    case 3:
       ros::spin();
       return 0;
     default:
