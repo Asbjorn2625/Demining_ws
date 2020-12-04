@@ -10,7 +10,7 @@
 #include <kobuki_msgs/Sound.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_listener.h>
-#include <sensor_msgs/Image.h>
+
 
 cv::Mat HSVImage;
 cv::Mat ThreshImage;
@@ -156,10 +156,10 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
     cv::cvtColor(cv_ptr->image, HSVImage, CV_BGR2HSV);
 
     //draws our detection window
-    P1.x = 50;
+    P1.x = 140;
     P1.y = 432;
-    P2.x = 592;
-    P2.y = 154;
+    P2.x = 502;
+    P2.y = 204;
     P3.x = 0;
     P3.y = 479;
     P4.x = P1.x;
@@ -184,7 +184,7 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
     cv::rectangle(cv_ptr->image, P1, P2, red);
 
     //Scans the image for red, the Scalar is calibrated with the calibration.cpp
-    cv::inRange(HSVImage, cv::Scalar(50, 80, 40), cv::Scalar(80, 255, 255), ThreshImage);
+    cv::inRange(HSVImage, cv::Scalar(47, 79, 111), cv::Scalar(104, 255, 255), ThreshImage);
     //blurs the image to filter the noise
     cv::blur(ThreshImage, Blurimage, cv::Size(3, 3));
     //Makes the lines more visible
@@ -204,14 +204,15 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
         cv::approxPolyDP(contours[i], contours_poly[i], 3, true);
         boundRect[i] = cv::boundingRect(contours_poly[i]);
         double area = cv::contourArea(contours[i]);
-        if (area >= 500 && currentTimer + delay < ros::Time::now())
+        if (area >= 50 && currentTimer + delay < ros::Time::now())
         {
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
-          soundMSG.value=6;
+          soundMSG.value=3;
           sound_pub.publish(soundMSG);
-          cv::imwrite(cv::format("mine%d.jpg",img_num), cv_ptr->image);
+          cv::imwrite(cv::format("mine%d.bmp",img_num), cv_ptr->image);
+          
           mineCounter++;
           double currentPos[4];
           getMinePosition(currentPos);
