@@ -540,6 +540,88 @@ default: //FEJL
 
 
 
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//SAVE DATA
+
+//INCLUDE
+#include <fstream> //Read/write on local files
+#include <ctime> //? not sure if used
+
+//DEFINING VARIBLES
+int FoundMines = 0;     //Number of found mines
+float CurrentMinePosX;  
+float CurrentMinePosY;  
+float minePosX[1000];   //mine NUmbER aNd iTS X-cOORdINAte
+float minePosY[1000];   //Mine nUmbeR aND its Y-cooRdInaTe
+float AreaLenght = 1;   //Given area lenght
+float AreaWidth = 1;    //given area width
+
+
+
+//SUBSCRIBERCALLBACK
+
+void mineCounterCallBack(const geometry_msgs::PoseStamped MineMessage){
+    CurrentMinePosX = MineMessage.pose.position.x;
+    CurrentMinePosY = MineMessage.pose.position.y;
+    FoundMines++;
+    minePosX[FoundMines] = CurrentMinePosX;
+    minePosY[FoundMines] = CurrentMinePosY;
+    std::cout << "Got a Mine!\n";
+    std::cout << "Mine " << FoundMines << " at : " << minePosX[FoundMines] << "," << minePosY[FoundMines] << "\n\n";
+
+}
+
+
+//DEFINE SUBSCRIBER
+ros::NodeHandle n;
+ros::Rate rate(10); //the larger the value, the "smoother" , try value of 1 to see "jerk" movement
+
+ros::Subscriber GetMinePos = n.subscribe("mineCounter",1000, mineCounterCallBack);
+
+
+//WHEN-ACTIVATED-FUNCTION
+
+
+void SaveData(){                    //Function to save data locally on a file
+    int counter=1;
+    while(counter){
+        std::cout << "Saving Data" << "\n";
+        myfile.open ("The Program that dosn't work.txt", std::fstream::app);
+        if(myfile.is_open()){
+            time_t timeNow = time(0);
+            myfile << "                         Saving from this run. Date/time : " << ctime(&timeNow) << "\n";
+            if(FoundMines!=0){
+                myfile << "Found mines: " << FoundMines << "\n";
+                myfile << "     Mine(s) is located at : \n";
+                    for(int i=1; i<=FoundMines;i++){
+                        myfile << "Mine " << i << " at : " << minePosX[i] << "," << minePosY[i] << "\n\n";
+                    }
+            }
+            else{ myfile << "No Mines Found \n";}
+            myfile << "Area size:   " << AreaLenght << " X " << AreaWidth << " equals to : " << AreaLenght*AreaWidth << "m²" << "\n";
+            myfile << "\n";
+            myfile << "you Launched MineSweeper an got this!\n\n\n\n\n";
+            myfile.close();
+            counter=0;
+        }
+        else if(counter>=20){
+            std::cout << "ERROR - Creating file..." << "\n";
+            myfile.open("The Program that dosn't work.txt", std::fstream::out);
+            counter=1;
+        }
+        else{
+           std::cout << "no connection to file" << "\n";
+            counter++;
+        }
+        
+    }
+}
+
+
+*/
+
+
+
 
 
 

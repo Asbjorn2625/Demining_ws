@@ -10,6 +10,7 @@
 #include <kobuki_msgs/Sound.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_listener.h>
+#include <fstream> //Read/write on local files
 
 
 cv::Mat HSVImage;
@@ -30,12 +31,18 @@ cv::Scalar NavyBlue(237, 27, 36);
 static const std::string OPENCV_WINDOW = "Image window";
 
 
-
+//Defining Global Variables
 int mineCounter = 0;
 int markerId;
 ros::Time currentTimer;
 int firstRun = 0;
 int img_num = 0;
+
+float minePosX[1000];   //Mine number via 'mineCounter' and its X-coordinate
+float minePosY[1000];   //Mine number via 'mineCounter' and its Y-coordinate
+//Saving data
+std::ofstream myfile; //Used to save a file (this is the same as 'nh_' when using Sub or Pub)
+
 
 class ImageConverter
 {
@@ -50,6 +57,7 @@ private:
   ros::Publisher marker_pub = nh_.advertise<visualization_msgs::MarkerArray>("mine_markers", 1);
   ros::Publisher mine_pub = nh_.advertise<geometry_msgs::PoseStamped>("mineCounter",1);
   geometry_msgs::PoseStamped mineMessage,pBase, pMap;
+
 
 public:
 
@@ -74,6 +82,39 @@ double radians = std::atan2(siny_cosp, cosy_cosp);
 mapPose[0] = pMap.pose.position.x+0.5*cos(radians);
 mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
 }
+
+
+void SaveData(){                    //Function to save data locally on a file
+    int counter=1;
+    while(counter){
+        myfile.open ("The Program that dosn't work.txt");
+        if(myfile.is_open()){
+            time_t timeNow = time(0);
+            myfile << "                         Saving from this run. Date/time : " << ctime(&timeNow) << "\n";
+            if(mineCounter!=0){
+                myfile << "Found mines: " << mineCounter << "\n";
+                myfile << "     Mine(s) is located at : \n";
+                    for(int i=1; i<=mineCounter;i++){
+                        myfile << "Mine " << i << " at : " << minePosX[i] << "," << minePosY[i] << "\n\n";
+                    }
+            }
+            else{ myfile << "No Mines Found \n";}
+            myfile.close();
+            counter=0;
+        }
+        else if(counter>=20){
+            std::cout << "ERROR - Creating file..." << "\n";
+            myfile.open("The Program that dosn't work.txt", std::fstream::out);
+            counter=1;
+        }
+        else{
+           std::cout << "no connection to file" << "\n";
+            counter++;
+        }
+        
+    }
+}
+
 
 
   void setPointMap(double posX, double posY, double size, double height, uint32_t shape)
@@ -220,6 +261,9 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
           mineMessage.pose.position.x = currentPos[0];
           mineMessage.pose.position.y = currentPos[1];
           mine_pub.publish(mineMessage);
+          minePosX[mineCounter] = currentPos[0]; //Define X-coordinate for mine to SaveData();
+          minePosY[mineCounter] = currentPos[1]; //Define Y-coordinate for mine to SaveData();
+          SaveData();
           img_num++;
         };
 
@@ -233,7 +277,10 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
     cv::imshow(OPENCV_WINDOW, cv_ptr->image);
     cv::waitKey(3);
   };
+
 };
+
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "image_converter");
