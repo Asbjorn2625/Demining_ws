@@ -41,10 +41,12 @@ std::cout << "motion started\n";
 
 	//set the linear velocity to a positive value if isFoward is true
 	if (isForward)
-		base_cmd.linear.x =abs(speed);
+		base_cmd.linear.x =speed;
 	else //else set the velocity to negative value to move backward
-		base_cmd.linear.x =-abs(speed);
+		base_cmd.linear.x =-speed;
 	
+	std::cout << base_cmd.linear.x << std::endl;
+
 	base_cmd.linear.y =0;
 	base_cmd.linear.z =0;
 	
@@ -174,20 +176,20 @@ void Foundmine(const geometry_msgs::PoseStamped MineMessage){
   
   std::cout << "just before motion begins\n";
   //moveStraight(0.0,0.0,true); //stops motion
-  moveStraight(1,0.5,false); //moves 0.5m backwards
-  //ros::Duration(0.1).sleep();
+  moveStraight(0.2,0.3,false); //moves 0.5m backwards
+  ros::Duration(2.5).sleep();
   ros::spinOnce;
   rotate(0.4,M_PI/2,true); //Turns 90 degrees to the right
-  //ros::Duration(0.1).sleep();
+  ros::Duration(4).sleep();
   ros::spinOnce;
-  moveStraight(1,0.5,true); //moves 0.3m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
-  //ros::Duration(0.1).sleep();
+  moveStraight(0.2,0.5,true); //moves 0.5m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
+  ros::Duration(2.5).sleep();
   ros::spinOnce;
   rotate(0.4,M_PI/2,false); //Turns 90 degrees to the left
-  //ros::Duration(0.1).sleep();
+  ros::Duration(4).sleep();
   ros::spinOnce;
-  moveStraight(1,0.5,true); // moves 0.3m forward to dodge the mine
-  ros::Duration(0.1).sleep();
+  moveStraight(0.2,0.5,true); // moves 0.5m forward to dodge the mine
+  ros::Duration(2.5).sleep();
   ros::spinOnce;
   std::cout << "Mine Found!(Mine number: " << MineMessage.header.frame_id <<" at : "  << MineMessage.pose.position.x << "," << MineMessage.pose.position.y << " )\n";
 }

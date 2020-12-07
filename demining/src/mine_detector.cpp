@@ -156,9 +156,9 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
     cv::cvtColor(cv_ptr->image, HSVImage, CV_BGR2HSV);
 
     //draws our detection window
-    P1.x = 40;
+    P1.x = 100;
     P1.y = 432;
-    P2.x = 602;
+    P2.x = 522;
     P2.y = 204;
     P3.x = 0;
     P3.y = 479;
