@@ -156,9 +156,9 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
     cv::cvtColor(cv_ptr->image, HSVImage, CV_BGR2HSV);
 
     //draws our detection window
-    P1.x = 140;
+    P1.x = 40;
     P1.y = 432;
-    P2.x = 502;
+    P2.x = 602;
     P2.y = 204;
     P3.x = 0;
     P3.y = 479;
@@ -204,14 +204,14 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
         cv::approxPolyDP(contours[i], contours_poly[i], 3, true);
         boundRect[i] = cv::boundingRect(contours_poly[i]);
         double area = cv::contourArea(contours[i]);
-        if (area >= 50 && currentTimer + delay < ros::Time::now())
+        if (area >= 500 && currentTimer + delay < ros::Time::now())
         {
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
           soundMSG.value=3;
           sound_pub.publish(soundMSG);
-          cv::imwrite(cv::format("mine%d.bmp",img_num), cv_ptr->image);
+          cv::imwrite(cv::format("demining_project/Mine_Pictures/mine%d.bmp",img_num), cv_ptr->image);
           
           mineCounter++;
           double currentPos[4];
