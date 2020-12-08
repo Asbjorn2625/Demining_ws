@@ -86,7 +86,7 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
 void SaveData(){                    //Function to save data locally on a file
     int counter=1;
     while(counter){
-        myfile.open ("demining_project/Hvor er Suzanne?.txt");
+        myfile.open ("demining_project/Mine_Pictures/Hvor er Suzanne?.txt");
         if(myfile.is_open()){
             time_t timeNow = time(0);
             myfile << "                         Saving from this run. Date/time : " << ctime(&timeNow) << "\n";
@@ -103,7 +103,7 @@ void SaveData(){                    //Function to save data locally on a file
         }
         else if(counter>=20){
             std::cout << "ERROR - Creating file..." << "\n";
-            myfile.open("demining_project/Hvor er Suzanne?.txt", std::fstream::out);
+            myfile.open("demining_project/Mine_Pictures/Hvor er Suzanne?.txt", std::fstream::out);
             counter=1;
         }
         else{
