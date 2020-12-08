@@ -6,6 +6,8 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <math.h>
+#include <stdio.h>
 
 class MovingToPosition{
 private:
@@ -206,7 +208,7 @@ while(errors == true){
 }
   double startPositions[4];
   double minePositions[4];
-  int pointsOnMap = mineZone[0]*4;
+  int pointsOnMap = mineZone[0]*5;
   double xPoint[pointsOnMap];
   double yPoint[pointsOnMap];
   geometry_msgs::Pose start_msg;
@@ -218,52 +220,55 @@ while(errors == true){
   start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a map
   ros::spinOnce();
   start.getPosition(minePositions);
-  printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
+  //printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
   xPoint[0] = minePositions[0]; //saving pos for later, and publishing it
   yPoint[0] = minePositions[1];
+  
 
   start_msg.position.x = minePositions[0];
   start_msg.position.y = minePositions[1];
   start_msg.orientation.w = minePositions[2];
   start_msg.orientation.z = minePositions[3];
   start.deminingArea_pub.publish(start_msg);
-
+  loop_rate.sleep();
+  
   //calculate angle
   double x_distance = minePositions[0] - startPositions[0];
   double y_distance = minePositions[1] - startPositions[1];
   double heading =atan2(y_distance,x_distance);
   ROS_INFO("heading (%2f)", heading);
+  loop_rate.sleep();
 
-for (int i=1;i<pointsOnMap+1;){
+for (int i=1;i< pointsOnMap; i = i+4){
+  std::cout << "i = " << i;
   //first point
   xPoint[i] = xPoint[i-1]+mineZone[1]*cos(heading);
   yPoint[i] = yPoint[i-1]+mineZone[1]*sin(heading);
 
   //second point
-  xPoint[i+1] = xPoint[i]+1.0*cos(heading-M_PI/2);
-  yPoint[i+1] = yPoint[i]+1.0*sin(heading-M_PI/2);
+  xPoint[i+1] = xPoint[i]+0.4*cos(heading-M_PI/2);
+  yPoint[i+1] = yPoint[i]+0.4*sin(heading-M_PI/2);
 
   //third point
   xPoint[i+2] = xPoint[i+1]-mineZone[1]*cos(heading);
   yPoint[i+2] = yPoint[i+1]-mineZone[1]*sin(heading);
 
   //fourth point
-  xPoint[i+3] = xPoint[i+2]+1.0*cos(heading-M_PI/2);
-  yPoint[i+3] = yPoint[i+2]+1.0*sin(heading-M_PI/2);
-i = i+4;
+  xPoint[i+3] = xPoint[i+2]+0.4*cos(heading-M_PI/2);
+  yPoint[i+3] = yPoint[i+2]+0.4*sin(heading-M_PI/2);
+  
 }
 //last point
-  xPoint[pointsOnMap+1] = xPoint[pointsOnMap]+mineZone[1]*cos(heading);
-  yPoint[pointsOnMap+1] = yPoint[pointsOnMap]+mineZone[1]*sin(heading);
+  xPoint[pointsOnMap] = xPoint[pointsOnMap-1]+mineZone[1]*cos(heading);
+  yPoint[pointsOnMap] = yPoint[pointsOnMap-1]+mineZone[1]*sin(heading);
 
-start.setPointPath(xPoint,yPoint,pointsOnMap+2);
+start.setPointPath(xPoint,yPoint,pointsOnMap+1);
 
-for(int i=0; i < pointsOnMap+1;){
+for(int i=0; i < pointsOnMap+1;i++){
 printf("location %d = (%.2f,%.2f)\n", i,xPoint[i],yPoint[i]);
-i++;
-}
 
-for (int i =1;i<mineZone[0]*4+1;i++){
+}
+for (int i =1;i<pointsOnMap+1;i++){
   ros::Duration(1.0).sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
 }
