@@ -36,7 +36,6 @@ int mineCounter = 0;
 int markerId;
 ros::Time currentTimer;
 int firstRun = 0;
-int img_num = 0;
 
 float minePosX[1000];   //Mine number via 'mineCounter' and its X-coordinate
 float minePosY[1000];   //Mine number via 'mineCounter' and its Y-coordinate
@@ -87,7 +86,7 @@ mapPose[1] = pMap.pose.position.y+0.5*sin(radians);
 void SaveData(){                    //Function to save data locally on a file
     int counter=1;
     while(counter){
-        myfile.open ("The Program that dosn't work.txt");
+        myfile.open ("demining_project/Mine_Pictures/Hvor er Suzanne?.txt");
         if(myfile.is_open()){
             time_t timeNow = time(0);
             myfile << "                         Saving from this run. Date/time : " << ctime(&timeNow) << "\n";
@@ -104,7 +103,7 @@ void SaveData(){                    //Function to save data locally on a file
         }
         else if(counter>=20){
             std::cout << "ERROR - Creating file..." << "\n";
-            myfile.open("The Program that dosn't work.txt", std::fstream::out);
+            myfile.open("demining_project/Mine_Pictures/Hvor er Suzanne?.txt", std::fstream::out);
             counter=1;
         }
         else{
@@ -247,14 +246,14 @@ void SaveData(){                    //Function to save data locally on a file
         double area = cv::contourArea(contours[i]);
         if (area >= 500 && currentTimer + delay < ros::Time::now())
         {
+          mineCounter++;
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
           soundMSG.value=6;
           sound_pub.publish(soundMSG);
-          cv::imwrite(cv::format("demining_project/Mine_Pictures/mine%d.bmp",img_num), cv_ptr->image);
+          cv::imwrite(cv::format("demining_project/Mine_Pictures/mine%d.bmp",mineCounter), cv_ptr->image);
           
-          mineCounter++;
           double currentPos[4];
           getMinePosition(currentPos);
           mineMessage.header.frame_id=std::to_string(mineCounter);
@@ -264,7 +263,6 @@ void SaveData(){                    //Function to save data locally on a file
           minePosX[mineCounter] = currentPos[0]; //Define X-coordinate for mine to SaveData();
           minePosY[mineCounter] = currentPos[1]; //Define Y-coordinate for mine to SaveData();
           SaveData();
-          img_num++;
         };
 
         // Drawing the contours on our image window
