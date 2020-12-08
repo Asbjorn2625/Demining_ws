@@ -214,7 +214,7 @@ void SaveData(){                    //Function to save data locally on a file
     P8.x = P3.x;
     P8.y = P2.y;
   
-    ros::Duration delay(5.0);
+    ros::Duration delay(7.0);
 
     //kanter rundt om vores detection window
     cv::rectangle(HSVImage, P3, P4, red, -1);
@@ -250,7 +250,7 @@ void SaveData(){                    //Function to save data locally on a file
           currentTimer = ros::Time::now();
           std::cout << "der er en mine i dette område" << std::endl;
           setPointMap(0.3, 0.0, 0.2, 0.2, visualization_msgs::Marker::CUBE);
-          soundMSG.value=3;
+          soundMSG.value=6;
           sound_pub.publish(soundMSG);
           cv::imwrite(cv::format("demining_project/Mine_Pictures/mine%d.bmp",img_num), cv_ptr->image);
           
