@@ -220,11 +220,10 @@ while(errors == true){
   start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a map
   ros::spinOnce();
   start.getPosition(minePositions);
-  //printf("robot pose: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
+  //printf("before save: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
   xPoint[0] = minePositions[0]; //saving pos for later, and publishing it
   yPoint[0] = minePositions[1];
   
-
   start_msg.position.x = minePositions[0];
   start_msg.position.y = minePositions[1];
   start_msg.orientation.w = minePositions[2];
@@ -244,31 +243,39 @@ for (int i=1;i< pointsOnMap; i = i+4){
   //first point
   xPoint[i] = xPoint[i-1]+mineZone[1]*cos(heading);
   yPoint[i] = yPoint[i-1]+mineZone[1]*sin(heading);
+  printf("after save 1,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
 
   //second point
   xPoint[i+1] = xPoint[i]+0.4*cos(heading-M_PI/2);
   yPoint[i+1] = yPoint[i]+0.4*sin(heading-M_PI/2);
+  printf("after save 2,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
 
   //third point
   xPoint[i+2] = xPoint[i+1]-mineZone[1]*cos(heading);
   yPoint[i+2] = yPoint[i+1]-mineZone[1]*sin(heading);
+  printf("after save 3,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
 
   //fourth point
   xPoint[i+3] = xPoint[i+2]+0.4*cos(heading-M_PI/2);
   yPoint[i+3] = yPoint[i+2]+0.4*sin(heading-M_PI/2);
-  
+  printf("after save 4,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
 }
-//last point
-  xPoint[pointsOnMap] = xPoint[pointsOnMap-1]+mineZone[1]*cos(heading);
-  yPoint[pointsOnMap] = yPoint[pointsOnMap-1]+mineZone[1]*sin(heading);
+//gore problems require gore solutions
+xPoint[0] = minePositions[0];
+yPoint[0] = minePositions[1];
 
-start.setPointPath(xPoint,yPoint,pointsOnMap+1);
+printf("after save 5: (%.2f, %.2f)\n", xPoint[0], yPoint[0]);
+//last point (unneeded)
+  //xPoint[pointsOnMap] = xPoint[pointsOnMap-1]+mineZone[1]*cos(heading);
+  //yPoint[pointsOnMap] = yPoint[pointsOnMap-1]+mineZone[1]*sin(heading);
 
-for(int i=0; i < pointsOnMap+1;i++){
+start.setPointPath(xPoint,yPoint,pointsOnMap);
+
+for(int i=0; i < pointsOnMap;i++){
 printf("location %d = (%.2f,%.2f)\n", i,xPoint[i],yPoint[i]);
 
 }
-for (int i =1;i<pointsOnMap+1;i++){
+for (int i =1;i<pointsOnMap;i++){
   ros::Duration(1.0).sleep();
   start.moveToMap(xPoint[i],yPoint[i]);
 }
