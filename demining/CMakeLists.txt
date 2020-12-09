@@ -37,18 +37,16 @@ include_directories(
 
 # Declare Kill Turtles C++ executable and rename to short name (in case catkin_make is used).
 add_executable(mine_detector src/mine_detector.cpp)
-add_executable(calibration src/calibration.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 add_executable(batteryMonitor src/batteryMonitor.cpp)
-add_executable(BumperTest src/BumperTest.cpp)
+add_executable(AvoidMine src/AvoidMine.cpp)
 
 # Link to Catkin libraries
 target_link_libraries(mine_detector ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-target_link_libraries(calibration ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES})
 target_link_libraries(batteryMonitor ${catkin_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-target_link_libraries(BumperTest ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
+target_link_libraries(AvoidMine ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 
 
@@ -58,7 +56,7 @@ target_link_libraries(BumperTest ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 ############w#
 
 # Mark executables for installation
-install(TARGETS locate_d_area calibration BumperTest batteryMonitor mine_detector
+install(TARGETS locate_d_area AvoidMine batteryMonitor mine_detector
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
