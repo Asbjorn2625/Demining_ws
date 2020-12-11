@@ -4,6 +4,8 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
+#include <tf/tf.h>
+#include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <math.h>
@@ -12,7 +14,12 @@
 class MovingToPosition{
 private:
 ros::NodeHandle n;
+ros::Publisher cmd_vel_pub =n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
+
+geometry_msgs::Twist base_cmd;
 tf::TransformListener listener;
+tf::StampedTransform init_transform;
+tf::StampedTransform current_transform;
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Demining_markers", 10);
@@ -21,6 +28,27 @@ move_base_msgs::MoveBaseGoal goal;
 public:
 std::string userInput = "";
 ros::Publisher deminingArea_pub = n.advertise<geometry_msgs::Pose>("start_position", 10);
+
+void moveStraightTwist(double speed, double distance, bool isForward){
+  ros::Rate loop_rate(10);
+	if (isForward)
+		base_cmd.linear.x = speed;
+	else //else set the velocity to negative value to move backward
+		base_cmd.linear.x =-speed;
+	
+	base_cmd.linear.y =0;
+	base_cmd.linear.z =0;
+	
+	base_cmd.angular.x = 0;
+	base_cmd.angular.y = 0;
+	base_cmd.angular.z =0;
+
+	for (int i = 0; i< distance/speed*10; i++){
+  std::cout << "moving straight\n";
+  cmd_vel_pub.publish(base_cmd);
+  loop_rate.sleep();
+  }
+}
 
 double getPosition(double mapPose[]){
 ros::spinOnce();
@@ -209,15 +237,18 @@ while(errors == true){
   double startPositions[4];
   double minePositions[4];
   int pointsOnMap = mineZone[0]*5;
-  double xPoint[pointsOnMap];
-  double yPoint[pointsOnMap];
+  double xPoint[pointsOnMap+3];
+  double yPoint[pointsOnMap+3];
   geometry_msgs::Pose start_msg;
 
+  //leave the charging station
+  start.moveStraightTwist(0.2,0.5,false);
+  ros::Duration(3).sleep();
   //moving according to the map
   ros::spinOnce();
   start.getPosition(startPositions);
   printf("robot pose: (%.2f, %.2f)\n", startPositions[0], startPositions[1]);
-  start.moveTo(-1.0, 0.0, "Backwards"); //moving directly backwards without a map
+  start.moveTo(-0.5, 0.0, "Backwards"); //moving directly backwards without a map
   ros::spinOnce();
   start.getPosition(minePositions);
   //printf("before save: (%.2f, %.2f)\n", minePositions[0], minePositions[1]);
@@ -244,30 +275,25 @@ for (int i=1;i< pointsOnMap; i = i+4){
   xPoint[i] = xPoint[i-1]+mineZone[1]*cos(heading);
   yPoint[i] = yPoint[i-1]+mineZone[1]*sin(heading);
   printf("after save 1,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
-
+  if (i+1 > pointsOnMap)
+  break;
   //second point
   xPoint[i+1] = xPoint[i]+0.4*cos(heading-M_PI/2);
   yPoint[i+1] = yPoint[i]+0.4*sin(heading-M_PI/2);
   printf("after save 2,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
-
+  if (i+2 > pointsOnMap)
+  break;
   //third point
   xPoint[i+2] = xPoint[i+1]-mineZone[1]*cos(heading);
   yPoint[i+2] = yPoint[i+1]-mineZone[1]*sin(heading);
   printf("after save 3,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
-
+  if (i+3 > pointsOnMap)
+  break;
   //fourth point
   xPoint[i+3] = xPoint[i+2]+0.4*cos(heading-M_PI/2);
   yPoint[i+3] = yPoint[i+2]+0.4*sin(heading-M_PI/2);
   printf("after save 4,%d: (%.2f, %.2f)\n", i,xPoint[0], yPoint[0]);
 }
-//gore problems require gore solutions
-xPoint[0] = minePositions[0];
-yPoint[0] = minePositions[1];
-
-printf("after save 5: (%.2f, %.2f)\n", xPoint[0], yPoint[0]);
-//last point (unneeded)
-  //xPoint[pointsOnMap] = xPoint[pointsOnMap-1]+mineZone[1]*cos(heading);
-  //yPoint[pointsOnMap] = yPoint[pointsOnMap-1]+mineZone[1]*sin(heading);
 
 start.setPointPath(xPoint,yPoint,pointsOnMap);
 
