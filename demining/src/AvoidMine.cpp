@@ -176,20 +176,20 @@ void Foundmine(const geometry_msgs::PoseStamped MineMessage){
   
   std::cout << "just before motion begins\n";
   //moveStraight(0.0,0.0,true); //stops motion
-  moveStraight(0.2,0.5,false); //moves 0.5m backwards
-  ros::Duration(1.4).sleep();
+  moveStraight(0.2,0.2,false); //moves 0.5m backwards
+  ros::Duration(1).sleep();
   ros::spinOnce;
   rotate(0.4,M_PI/2,true); //Turns 90 degrees to the right
   ros::Duration(2.9).sleep();
   ros::spinOnce;
-  moveStraight(0.2,0.5,true); //moves 0.5m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
-  ros::Duration(1.4).sleep();
+  moveStraight(0.2,0.3,true); //moves 0.5m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
+  ros::Duration(2.5).sleep();
   ros::spinOnce;
   rotate(0.4,M_PI/2,false); //Turns 90 degrees to the left
   ros::Duration(2.9).sleep();
   ros::spinOnce;
-  moveStraight(0.2,0.5,true); // moves 0.5m forward to dodge the mine
-  ros::Duration(1.4).sleep();
+  moveStraight(0.2,0.4,true); // moves 0.5m forward to dodge the mine
+  ros::Duration(2).sleep();
   ros::spinOnce;
   std::cout << "Mine Found!(Mine number: " << MineMessage.header.frame_id <<" at : "  << MineMessage.pose.position.x << "," << MineMessage.pose.position.y << " )\n";
 }
