@@ -259,7 +259,7 @@ while(errors == true){
   start_msg.position.y = minePositions[1];
   start_msg.orientation.w = minePositions[2];
   start_msg.orientation.z = minePositions[3];
-  start.deminingArea_pub.publish(start_msg);
+  start.deminingArea_pub.publish(start_msg);  //Publishing start position to batteryMonitor
   loop_rate.sleep();
   
   //calculate angle
