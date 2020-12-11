@@ -90,14 +90,19 @@ std::cout << "motion started\n";
 		}
 		//calculate the distance moved
 		//std::cout << "Initial Transform: " << init_transform << " , "<<"Current Transform: " << current_transform << std::endl;
+    
+    //ROS_INFO("Distance moved: %2f", distance_moved);
 
 		distance_moved = sqrt(pow((current_transform.getOrigin().x()-init_transform.getOrigin().x()), 2) +
 				pow((current_transform.getOrigin().y()-init_transform.getOrigin().y()), 2));
+    
+    ROS_INFO("Distance moved: %2f", distance_moved);
 
 	}while((distance_moved<distance)&&(ros::ok()));
 	//finally, stop the robot when the distance is moved
 	base_cmd.linear.x =0;
 	cmd_vel_pub.publish(base_cmd);
+  ROS_INFO("Distance moved: %2f", distance_moved);
 }
 
 double rotate(double angular_velocity, double radians,  bool clockwise)
@@ -176,19 +181,19 @@ void Foundmine(const geometry_msgs::PoseStamped MineMessage){
   
   std::cout << "just before motion begins\n";
   //moveStraight(0.0,0.0,true); //stops motion
-  moveStraight(0.2,0.2,false); //moves 0.5m backwards
+  moveStraight(0.2,0.2,false); //moves 0.4m backwards
   ros::Duration(1).sleep();
+  //ros::spinOnce;
+  rotate(1,M_PI/2,true); //Turns 90 degrees to the right
+  ros::Duration(1.2).sleep();
   ros::spinOnce;
-  rotate(0.4,M_PI/2,true); //Turns 90 degrees to the right
-  ros::Duration(2.9).sleep();
+  moveStraight(0.2,0.4,true); //moves 0.4m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
+  ros::Duration(2).sleep();
+  //ros::spinOnce;
+  rotate(1,M_PI/2,false); //Turns 90 degrees to the left
+  ros::Duration(1.2).sleep();
   ros::spinOnce;
-  moveStraight(0.2,0.3,true); //moves 0.5m forward THIS SHOULD BE CHANGED IF THE ROBOT STILL COLLIDES WITH THE MINES
-  ros::Duration(2.5).sleep();
-  ros::spinOnce;
-  rotate(0.4,M_PI/2,false); //Turns 90 degrees to the left
-  ros::Duration(2.9).sleep();
-  ros::spinOnce;
-  moveStraight(0.2,0.4,true); // moves 0.5m forward to dodge the mine
+  moveStraight(0.2,0.4,true); // moves 0.4m forward to dodge the mine
   ros::Duration(2).sleep();
   ros::spinOnce;
   std::cout << "Mine Found!(Mine number: " << MineMessage.header.frame_id <<" at : "  << MineMessage.pose.position.x << "," << MineMessage.pose.position.y << " )\n";
