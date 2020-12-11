@@ -143,6 +143,7 @@ void callbackStartPose(const geometry_msgs::Pose startPose)
 {
   homeGoal.target_pose.pose.position.x = startPose.position.x;
   homeGoal.target_pose.pose.position.y = startPose.position.y;
+  std::cout << "Ready to go! Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
   startPoseSub.shutdown(); //Subscriber only needs to update home once (tested this, works)
 }
 
@@ -269,7 +270,7 @@ int main(int argc, char *argv[])
   //The following is for testing only
   //int lastInput;
   ros::spinOnce();
-  std::cout << "Ready to go! Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
+  
   while (ros::ok())
   {
     ros::spinOnce(); //Updates all subscribed and published information
