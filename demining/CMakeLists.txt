@@ -40,6 +40,7 @@ add_executable(mine_detector src/mine_detector.cpp)
 add_executable(locate_d_area src/locate_d_area.cpp)
 add_executable(batteryMonitor src/batteryMonitor.cpp)
 add_executable(AvoidMine src/AvoidMine.cpp)
+add_executable(fakeOutOfBattery src/fakeOutOfBattery.cpp)
 
 # Link to Catkin libraries
 target_link_libraries(mine_detector ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
@@ -47,7 +48,7 @@ target_link_libraries(locate_d_area ${catkin_LIBRARIES})
 target_link_libraries(batteryMonitor ${catkin_LIBRARIES})
 target_link_libraries(locate_d_area ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 target_link_libraries(AvoidMine ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
-
+target_link_libraries(fakeOutOfBattery ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 
 
@@ -56,7 +57,7 @@ target_link_libraries(AvoidMine ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 ############w#
 
 # Mark executables for installation
-install(TARGETS locate_d_area AvoidMine batteryMonitor mine_detector
+install(TARGETS locate_d_area AvoidMine batteryMonitor mine_detector fakeOutOfBattery
 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

@@ -15,6 +15,8 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PointStamped.h>
 
+//#include <std_msgs/Int16.h>
+
 //Actionlib
 //typedef actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> dockingClient;
 //typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> moveBaseClient;
@@ -25,6 +27,7 @@ move_base_msgs::MoveBaseGoal homeGoal;
 ros::Subscriber kobukiBatStateSub;
 ros::Subscriber laptopBatlevelSub;
 ros::Subscriber startPoseSub;
+//ros::Publisher  stopOtherTasksPub;
 
 //Declaration of callback messagetypes
 kobuki_msgs::PowerSystemEvent kobBatState;
@@ -69,7 +72,7 @@ public:
     dc.waitForServer();                          //Wait for feedback from the Action server
 
     dc.sendGoal(dockingGoal);                    //Sends new goal to nodelet managing the docking procedure (check /opt/ros/kinetic/share/kobuki_auto_docking/launch/minimal.launch for additions to launch file)
-    dc.waitForResult(ros::Duration(10.0));       //ros::Duration(5.0) for maximum wait time?
+    dc.waitForResult();                          //ros::Duration(5.0) for maximum wait time?
 
     if (dc.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
@@ -147,6 +150,10 @@ void callbackStartPose(const geometry_msgs::Pose startPose)
 void headHomeToCharge()
 {
   //Stop current task
+  //std_msgs::Int16 stopTasksMsg;
+  //stopTasksMsg.data = 1;
+  //stopOtherTasksPub.publish(stopTasksMsg);
+  //ros::spinOnce();
 
   MovingToPosition moveClass;
   moveClass.getPosition(savedPose);
@@ -257,30 +264,34 @@ int main(int argc, char *argv[])
   //Subscibes to the PowerSystemEvent message, it updates whenever something happens with the power system of the kobuki base
   kobukiBatStateSub = n.subscribe("/mobile_base/events/power_system", 10, callbackKobukiBatState);
 
+  //stopOtherTasksPub = n.advertise<std_msgs::Int16>("pause_Tasks", 10, true);
+
   //The following is for testing only
-  int lastInput;
+  //int lastInput;
+  ros::spinOnce();
+  std::cout << "Ready to go! Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
   while (ros::ok())
   {
     ros::spinOnce(); //Updates all subscribed and published information
-    std::cout << "input a number from 1 to 7: " << std::endl;
-    std::cin >> lastInput;
+    //std::cout << "input a number from 1 to 3: " << std::endl;
+    //std::cin >> lastInput;
 
-    switch (lastInput)
-    {
-    case 1:
-      std::cout << "Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
-      break;
-    case 2:
-      headHomeToCharge();
-      std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
-      break;
-    case 3:
-      ros::spin();
-      return 0;
-    default:
-      std::cout << "Other input recieved, Ending program" << std::endl;
-      return 0;
-    }
+    //switch (lastInput)
+    //{
+    //case 1:
+    //  std::cout << "Start position at x = " << homeGoal.target_pose.pose.position.x << ", y = " << homeGoal.target_pose.pose.position.y << std::endl;
+    //  break;
+    //case 2:
+    //  headHomeToCharge();
+    //  std::cout << "Saved coordinates are: x = " << savedPose[0] << ", y = " << savedPose[1] << std::endl;
+    //  break;
+    //case 3:
+    //  ros::spin();
+    //  return 0;
+    //default:
+    //  std::cout << "Other input recieved, Ending program" << std::endl;
+    //  return 0;
+    //}
   }
   return 0;
 }
