@@ -1,0 +1,5 @@
+<launch>
+    <node name="locate_d_area" pkg="demining" type="locate_d_area" />
+    <node name="Avoid_Mines" pkg="demining" type="AvoidMine" />
+    <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find demining)/config/demining_rviz.rviz"/>
+</launch>

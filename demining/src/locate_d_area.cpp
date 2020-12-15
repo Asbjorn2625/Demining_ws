@@ -212,6 +212,7 @@ int main(int argc, char** argv){
 	ros::init(argc, argv, "locate_d_area");
 	MovingToPosition start;
 	ros::Rate loop_rate(10.0);
+  ros::Duration(4).sleep(); //for the .launch file
 
 	int corners = 2;
 	double mineZone[corners];

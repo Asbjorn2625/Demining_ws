@@ -1,0 +1,10 @@
+<launch>
+     <include file="$(find rtabmap_ros)/launch/demo/demo_two_kinects.launch">
+     <remap from="freenectlaunch" to="openni2launch"/>
+     <arg name="rtabmapviz" value="false" />
+     </include>
+     <include file="$(find kobuki_auto_docking)/launch/minimal.launch"/>
+
+    <node name="Mine_detector" pkg="demining" type="mine_detector" />
+    <node name="BatteryMonitor" pkg="demining" type="batteryMonitor" />
+</launch>

@@ -1,5 +1,0 @@
-<launch>
-    <node name="Main_UI_Terminal" pkg="demining" type="MineSweeper" />
-    <node name="Avoid_Mines" pkg="demining" type="BumperTest" />
-    <node name="User_Inputs_Terminal" pkg="demining" type="Input_User" />
-</launch>
